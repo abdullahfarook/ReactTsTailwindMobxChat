@@ -1,4 +1,5 @@
-import { observable, action, makeAutoObservable, computed } from "mobx";
+import { FieldState } from "formstate";
+import { observable, makeAutoObservable, computed } from "mobx";
 
 // Create RootStore, that will contain references to other stores
 export class RootStore {
@@ -16,7 +17,7 @@ export class RootStore {
 
 class UserStore {
     rootStore: RootStore;
-    @observable userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+    userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
     // RootStore is passed in constructor
     constructor(rootStore: RootStore) {
@@ -26,7 +27,7 @@ class UserStore {
     }
 
     
-    @computed get todos(): Todo[] {
+    get todos(): Todo[] {
         // Access todoStore through the root store.
         // In code below there is no author value in Todos, this was just created for show purpose
         return this.rootStore.todosStore.todos.filter(todo => todo.userId === this.userId)
@@ -48,10 +49,9 @@ class TodoStore {
 class ApplicationStore {
   items: string[] = [];
 
-  // currentItem = new FieldState("");
-  currentItem = "";
+  currentItem = new FieldState("");
   rootStore: RootStore;
-  @observable userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+  userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
     // RootStore is passed in constructor
     constructor(rootStore: RootStore) {
@@ -60,19 +60,14 @@ class ApplicationStore {
       this.rootStore = rootStore;
     }
 
-  addCurrentItem(arg: string) {
-    // this.items.push(this.currentItem.value);
-    // this.currentItem.onChange("");
-
-    this.items.push(this.currentItem);
-    this.currentItem = "";
+  addCurrentItem() {
+    this.items.push(this.currentItem.value);
+    this.currentItem.onChange("");
   }
 
   reset() {
     this.items = [];
-    this.currentItem = "";
-    // this.currentItem.onChange("");
-
+    this.currentItem.onChange("");
   }
 }
 class Todo{
