@@ -6,12 +6,25 @@ import viteSvgr from 'vite-plugin-svgr'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 export default defineConfig({
-  plugins: [react({
-    tsDecorators: true
-  }), eslintPlugin(), viteSvgr(), tsconfigPaths()],
+  plugins: [
+    react({
+      tsDecorators: true,
+    }),
+    eslintPlugin(),
+    viteSvgr(),
+    tsconfigPaths(),
+  ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src')
-    }
-  }
-})
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3080',
+        changeOrigin: true,
+      },
+    },
+  },
+});

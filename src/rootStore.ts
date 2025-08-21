@@ -17,7 +17,7 @@ export class RootStore {
 
 class UserStore {
     rootStore: RootStore;
-    userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+    userId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
     // RootStore is passed in constructor
     constructor(rootStore: RootStore) {
@@ -51,7 +51,7 @@ class ApplicationStore {
 
   currentItem = new FieldState("");
   rootStore: RootStore;
-  userId: string = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
+  userId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
 
     // RootStore is passed in constructor
     constructor(rootStore: RootStore) {
