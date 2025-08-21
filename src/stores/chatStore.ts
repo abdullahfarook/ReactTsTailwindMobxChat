@@ -1,8 +1,7 @@
-import api from "@/core/api";
 import { makeAutoObservable, observable, runInAction } from "mobx";
 
 
-class ChatStore {
+export class ChatStore {
     private _conversationsLoading = false;
     private _chatLoading = false;
     // private _conversations: TMessage[] = [];
@@ -25,5 +24,3 @@ class ChatStore {
         // }
     }
 }
-const chatStore = new ChatStore();  
-export default chatStore;

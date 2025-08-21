@@ -1,9 +1,9 @@
-class BaseApi {
-    private baseUrl: string;
-    constructor(url: string) {
-        if (!url || url == '') throw new Error('BaseApi: url is required');
-        this.baseUrl = url;
-    }
+export class ApiService {
+    private baseUrl: string = "http://localhost:5000";
+    // constructor(url: string) {
+    //     if (!url || url == '') throw new Error('BaseApi: url is required');
+    //     this.baseUrl = url;
+    // }
     public fetchGet<T>(input: RequestInfo): Promise<TResult<T>> {
         return this.fetch<T>(input);
     }
@@ -50,5 +50,5 @@ class BaseApi {
     }
 }
 // const api = new BaseApi(process.env.CATAILYST ?? '');
-const api = new BaseApi("http://localhost:5000");
-export default api;
+// const api = new BaseApi("http://localhost:5000");
+// export default api;

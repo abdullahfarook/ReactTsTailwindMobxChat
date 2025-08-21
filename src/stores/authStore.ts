@@ -1,23 +1,32 @@
-import api from "@/core/api";
-import { makeAutoObservable, observable, runInAction } from "mobx";
-import { useNavigate} from "react-router-dom";
 
-class AuthStore {
+import { makeAutoObservable} from "mobx";
+import { inject } from "react-ioc";
+import { ApiService } from "@/core/api";
+import { NavigationService } from "@/core/navigator";
+
+export class AuthStore {
+    @inject(ApiService) api!: ApiService;
+    @inject(NavigationService) nav!: NavigationService;
+
     isAuthenticated: boolean = false;
 
     constructor() {
+        console.log('AuthStore Created');
         makeAutoObservable(this);
     }
 
-   async loginDummy(user: string, password: string) {
+   loginDummy = async (): Promise<TResult<boolean>> => {
         // await task delay 1000
-        var delay = new Promise(resolve => setTimeout(resolve, 1000));
-        await delay;
+        console.log(this);
         this.isAuthenticated = true;
-
+        // this.nav.navigate('/chat/0');
+        return {
+            success: true,
+            data: true,
+        };
     }
-    async login(user: string, password: string) {
-        const res = await api.fetchPost<any>('/login', {
+    async login(user: string, password: string): Promise<TResult<boolean>> {
+        const res = await this.api.fetchPost<any>('/login', {
             user,
             password,
         });
@@ -33,6 +42,3 @@ class AuthStore {
     }
 
 }
-
-const authStore = new AuthStore();
-export default authStore;

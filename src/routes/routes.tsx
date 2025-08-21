@@ -1,8 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import ChatRoute from './ChatRoute';
 import { AuthLayout } from '@/layouts/AuthLayout';
-import LoginRoute from './AuthRoute';
-import authStore from '@/stores/authStore';
+import LoginRoute from './AuthRoute'; 
 import MainLayout from '@/layouts/MainLayout';
 
 
