@@ -1,7 +1,7 @@
 import { AuthStore } from "@/stores/authStore";
 import { useInstance } from "react-ioc";
 
-const Login = () => {
+export default function LoginView(){
     const auth = useInstance(AuthStore);
     return (
         <div className="flex flex-grow items-center justify-center">
@@ -22,4 +22,3 @@ const Login = () => {
         </div>
     )
 }
-export default Login;

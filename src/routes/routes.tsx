@@ -2,8 +2,8 @@ import { createBrowserRouter, Navigate, Outlet, useLocation, useNavigate } from 
 import { AuthLayout } from '@/layouts/AuthLayout';
 import MainLayout from '@/layouts/MainLayout';
 import { NavigatorProvider } from '@/core/navigator';
-import Login from './auth/Login';
-import TwoFactor from './auth/TwoFactor';
+import LoginView from './auth/LoginView';
+import TwoFactorView from './auth/TwoFactorView';
 import ChatView from './chat/ChatView';
 
 
@@ -17,11 +17,11 @@ export const router = createBrowserRouter([
         children: [
           {
             path: 'login',
-            element: <Login />,
+            element: <LoginView />,
           },
           {
             path: 'login/2fa',
-            element: <TwoFactor />,
+            element: <TwoFactorView />,
           },
         ],
       },

@@ -1,7 +1,7 @@
 import ConversationDetail from "./ConversationDetail";
 import ConversationPanel from "./ConversationPanel";
 
-export default function ChatDetail() {
+export default function ChatView() {
     return <>
         <ConversationPanel />
         <ConversationDetail />
