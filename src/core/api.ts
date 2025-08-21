@@ -4,32 +4,33 @@ export class ApiService {
     //     if (!url || url == '') throw new Error('BaseApi: url is required');
     //     this.baseUrl = url;
     // }
-    public fetchGet<T>(input: RequestInfo): Promise<TResult<T>> {
+    public get<T>(input: RequestInfo): Promise<TResult<T>> {
         return this.fetch<T>(input);
     }
-    public fetchPost<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
+    public post<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
         return this.fetch<T>(input, {
             method: 'POST',
             body: JSON.stringify(body),
         });
     }
-    public fetchPut<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
+    public put<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
         return this.fetch<T>(input, {
             method: 'PUT',
             body: JSON.stringify(body),
         });
     }
-    public fetchPatch<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
+    public patch<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
         return this.fetch<T>(input, {
             method: 'PATCH',
             body: JSON.stringify(body),
         });
     }
-    public fetchDelete<T>(input: RequestInfo): Promise<TResult<T>> {
+    public delete<T>(input: RequestInfo): Promise<TResult<T>> {
         return this.fetch<T>(input, {
             method: 'DELETE',
         });
     }
+    
     private async fetch<T>(input: RequestInfo, init?: RequestInit): Promise<TResult<T>> {
         input = `${this.baseUrl}${input}`;
         const token = localStorage.getItem('token');

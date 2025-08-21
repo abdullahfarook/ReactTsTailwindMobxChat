@@ -5,27 +5,23 @@ import { ApiService } from "@/core/api";
 import { NavigationService } from "@/core/navigator";
 
 export class AuthStore {
-    api = inject(this, ApiService);
-    nav = inject(this, NavigationService);
+    apiService = inject(this, ApiService);
+    navigator = inject(this, NavigationService);
     isAuthenticated: boolean = false;
 
     constructor() {
         makeAutoObservable(this);
     }
 
-   loginDummy = async (): Promise<TResult<boolean>> => {
+   async loginDummy() {
         // await task delay 1000
         var delay = new Promise(resolve => setTimeout(resolve, 1000));
         await delay;
         this.isAuthenticated = true;
-        this.nav.navigate('/chat/0');
-        return {
-            success: true,
-            data: true,
-        };
+        this.navigator.navigate('/chat/0');
     }
     async login(user: string, password: string): Promise<TResult<boolean>> {
-        const res = await this.api.fetchPost<any>('/login', {
+        const res = await this.apiService.post<any>('/login', {
             user,
             password,
         });

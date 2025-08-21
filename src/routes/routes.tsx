@@ -1,9 +1,10 @@
 import { createBrowserRouter, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import ChatRoute from './ChatRoute';
 import { AuthLayout } from '@/layouts/AuthLayout';
-import LoginRoute from './AuthRoute'; 
 import MainLayout from '@/layouts/MainLayout';
 import { NavigatorProvider } from '@/core/navigator';
+import Login from './auth/Login';
+import TwoFactor from './auth/TwoFactor';
+import ChatView from './chat/ChatView';
 
 
 export const router = createBrowserRouter([
@@ -16,7 +17,11 @@ export const router = createBrowserRouter([
         children: [
           {
             path: 'login',
-            element: <LoginRoute />,
+            element: <Login />,
+          },
+          {
+            path: 'login/2fa',
+            element: <TwoFactor />,
           },
         ],
       },
@@ -30,7 +35,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'chat/:conversationId?',
-            element: <ChatRoute />,
+            element: <ChatView />,
           },
         ],
       },
