@@ -15,7 +15,7 @@ class App extends React.Component {
   render() {
     return (
       <Provider myStore={store}>
-       <Test />
+       <Chat />
       </Provider>
     );
   }

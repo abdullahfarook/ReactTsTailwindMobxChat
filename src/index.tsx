@@ -1,4 +1,5 @@
-import 'index.css'
+import 'style.css'
+import 'mobile.css'
 import { createRoot } from 'react-dom/client'
 import App from './components/App'
 
