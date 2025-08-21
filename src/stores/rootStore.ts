@@ -1,5 +1,5 @@
 import { FieldState } from "formstate";
-import { observable, makeAutoObservable, computed } from "mobx";
+import { observable, makeAutoObservable} from "mobx";
 
 // Create RootStore, that will contain references to other stores
 export class RootStore {

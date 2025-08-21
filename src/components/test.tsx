@@ -1,5 +1,5 @@
 import { FieldInput } from "@/field";
-import { store } from "@/rootStore";
+import { store } from "@/stores/rootStore";
 import { observer } from "mobx-react"
 const app = store.appStore;
 const Test = observer(() => {

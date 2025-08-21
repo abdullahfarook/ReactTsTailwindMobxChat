@@ -2815,3 +2815,6 @@ html {
 .sharepoint-picker-bg{
   background-color: #F5F5F5;
 }
+.w-authPageWidth {
+    width: 370px;
+}

@@ -49,5 +49,6 @@ class BaseApi {
         }
     }
 }
-const api = new BaseApi(process.env.CATAILYST ?? '');
+// const api = new BaseApi(process.env.CATAILYST ?? '');
+const api = new BaseApi("http://localhost:5000");
 export default api;
