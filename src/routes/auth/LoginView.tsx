@@ -1,4 +1,4 @@
-import { AuthStore } from "@/stores/authStore";
+import { AuthStore } from "@/stores/AuthStore";
 import { useInstance } from "react-ioc";
 
 export default function LoginView(){

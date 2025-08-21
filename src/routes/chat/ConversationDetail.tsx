@@ -1,5 +1,9 @@
+import DetailHeader from "./compnents/DetailHeader";
+
 export default function ConversationDetail() {
-    return <div className="relative flex h-full max-w-full flex-1 flex-col overflow-hidden">
+    return <>
+    <DetailHeader />
+    <div className="relative flex h-full max-w-full flex-1 flex-col overflow-hidden">
         <div className="bg-token-main-surface-primary sticky top-0 z-10 flex min-h-[40px] items-center justify-center bg-white pl-1 dark:bg-gray-800 dark:text-white md:hidden">
             <button type="button" data-testid="mobile-header-new-chat-button" aria-label="Open sidebar" className="m-1 inline-flex size-10 items-center justify-center rounded-full hover:bg-surface-hover"><span className="sr-only">Open sidebar</span>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="icon-md">
@@ -667,4 +671,5 @@ export default function ConversationDetail() {
             </div>
         </main>
     </div>
+    </>
 }
