@@ -1,6 +1,5 @@
-// RouterSync.tsx
 import React, { useEffect } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { NavigateFunction, Outlet, useNavigate } from "react-router-dom";
 import { useInstance } from "react-ioc";
 
 export class NavigationService{
@@ -20,10 +19,9 @@ export class NavigationService{
 export const NavigatorProvider: React.FC = () => {
   const navigate = useNavigate();
   const navService = useInstance(NavigationService);
-
   useEffect(() => {
     navService.setNavigator(navigate);
   }, [navigate, navService]);
 
-  return null;
+  return <Outlet />;
 };

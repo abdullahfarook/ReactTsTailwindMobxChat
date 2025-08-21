@@ -5,11 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const LoginRoute: React.FC = (props) => {
     const auth = useInstance(AuthStore);
-    const navigate = useNavigate();
-    const login = () => {
-        auth.loginDummy();
-        navigate('/chat/0');
-    }
   return (
              <div id="root" style={{"padding":"25px"}} className="component-inspector-selected">
    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900" style={{}}>
@@ -38,7 +33,7 @@ const LoginRoute: React.FC = (props) => {
                   <div className="relative"><input type="password" id="password" autoComplete="current-password" aria-label="Password" name="password" aria-invalid="false" className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none" placeholder=" " /><label htmlFor="password" className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-green-600 dark:peer-focus:text-green-500 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4">Password</label></div>
                </div>
             </form>
-               <div className="mt-6"><button onClick={login} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-surface-submit text-white hover:bg-surface-submit-hover px-4 py-2 h-12 w-full rounded-2xl" aria-label="Continue" data-testid="login-button">Continue</button></div>
+               <div className="mt-6"><button onClick={auth.loginDummy} className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-surface-submit text-white hover:bg-surface-submit-hover px-4 py-2 h-12 w-full rounded-2xl" aria-label="Continue" data-testid="login-button">Continue</button></div>
 
             <p className="my-4 text-center text-sm font-light text-gray-700 dark:text-white"> Dont have an account? <a href="/register" className="inline-flex p-1 text-sm font-medium text-green-600 transition-colors hover:text-green-700 dark:text-green-400 dark:hover:text-green-300">Sign up</a></p>
          </div>
