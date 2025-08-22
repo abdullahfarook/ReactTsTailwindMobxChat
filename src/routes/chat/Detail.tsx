@@ -1,6 +1,6 @@
 import DetailHeader from "./compnents/DetailHeader";
 
-export default function ConversationDetail() {
+export default function Detail() {
     return <>
     <DetailHeader />
     <div className="relative flex h-full max-w-full flex-1 flex-col overflow-hidden">

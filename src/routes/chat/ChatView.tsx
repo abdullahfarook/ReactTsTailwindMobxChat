@@ -1,9 +1,9 @@
-import ConversationDetail from "./ConversationDetail";
-import ConversationPanel from "./ConversationPanel";
+import Detail from "./Detail";
+import SidePanel from "./SidePanel";
 
 export default function ChatView() {
     return <>
-        <ConversationPanel />
-        <ConversationDetail />
+        <SidePanel />
+        <Detail />
     </>
 }
