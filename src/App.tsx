@@ -5,7 +5,7 @@ import { router } from "./routes/routes";
 import { provider } from "react-ioc";
 import { ApiService } from "./core/api";
 import { AuthStore } from "./stores/AuthStore";
-import { NavigationService} from "./core/navigator";
+import { NavigationService} from "./components/NavigationService";
 import { ChatStore } from "./stores/ChatStore";
 import { AppStore } from "./stores/AppStore";
 

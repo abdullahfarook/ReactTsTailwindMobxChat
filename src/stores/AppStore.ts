@@ -1,5 +1,5 @@
 import { FieldState } from "formstate";
-import { observable, action, makeAutoObservable } from "mobx";
+import { makeAutoObservable } from "mobx";
 
 export class AppStore {
   currentItem = new FieldState("");

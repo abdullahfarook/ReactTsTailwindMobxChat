@@ -4,29 +4,29 @@ import { AppStore } from "@/stores/AppStore";
 import { observer } from "mobx-react";
 import { ChatStore } from "@/stores/ChatStore";
 import { useEffect } from "react";
-// import NavItem from "./compnents/NavItem";
 import cn from "@/core/utils";
 import NavItem from "./compnents/NavItem";
+import Loading from "@/components/Loading";
 
 function SidePanel() {
-    const appStore = useInstance(AppStore);
-    const chatStore = useInstance(ChatStore);
+    const app = useInstance(AppStore);
+    const chat = useInstance(ChatStore);
 
     const navStyle: React.CSSProperties = {
-        width: appStore.isSidebarOpen ? "260px" : "0px",
-        transform: appStore.isSidebarOpen ? "translateX(0px)" : "translateX(-100%)",
+        width: app.isSidebarOpen ? "260px" : "0px",
+        transform: app.isSidebarOpen ? "translateX(0px)" : "translateX(-100%)",
     };
 
     useEffect(() => {
-        chatStore.loadConversations();
+        chat.loadConversations();
     }, []);
-
+    
     return <div data-testid="nav" className="nav active max-w-[320px] flex-shrink-0 transform overflow-x-hidden bg-surface-primary-alt transition-all duration-200 ease-in-out md:max-w-[260px]" style={navStyle}>
         <div className="h-full w-[320px] md:w-[260px]">
             <div className="flex h-full flex-col">
                 <div className={cn(
                     'flex h-full flex-col transition-opacity duration-200 ease-in-out opacity-100',
-                    appStore.isSidebarOpen ? 'opacity-100' : 'opacity-0',
+                    app.isSidebarOpen ? 'opacity-100' : 'opacity-0',
                 )}>
                     <div className="flex h-full flex-col">
                         <nav id="chat-history-nav" aria-label="Chat History" className="flex h-full flex-col px-2 pb-3.5 md:px-3">
@@ -43,13 +43,12 @@ function SidePanel() {
                                                     "width": "auto", "height": "208px", "maxWidth": "236px", "maxHeight": "208px",  "position":
                                                         "relative"
                                                 }}>
-                                                    {chatStore.conversationsLoading && loading()}
-                                                    {!chatStore.conversationsLoading && chatStore.conversationsByDate.map(([key, conversation]) =>
+                                                    {chat.convsLoading && <Loading />}
+                                                    {!chat.convsLoading && chat.convsByDate.map(([key, conversation]) =>
                                                         <div key={key} style={{"left": "0px",  "top": "0px", "width": "100%" }}>
                                                             <div className="mt-2 pl-2 pt-1 text-text-secondary" style={{ "fontSize": "0.7rem" }}>{key}</div>    
-                                                            {conversation.map((message) => <NavItem key={message.id} id={message.id} title={message.content} active={chatStore.activeConversationId === message.id} onClick={() => chatStore.loadChat(message.id)} />)}
+                                                            {conversation.map((message) => <NavItem key={message.id} id={message.id} title={message.title} active={chat.activeConvId === message.id} onClick={() => chat.loadChat(message.id)} />)}
                                                         </div>
-                                                        
                                                     )}
 
 
@@ -117,7 +116,6 @@ function SidePanel() {
         </div>
     </div>
 }
-const loading = () => {
-    return <div>Loading...</div>
-}
+
+
 export default observer(SidePanel);

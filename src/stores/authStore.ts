@@ -2,7 +2,7 @@
 import { makeAutoObservable} from "mobx";
 import { inject } from "react-ioc";
 import { ApiService } from "@/core/api";
-import { NavigationService } from "@/core/navigator";
+import { NavigationService } from "@/components/NavigationService";
 
 export class AuthStore {
     apiService = inject(this, ApiService);

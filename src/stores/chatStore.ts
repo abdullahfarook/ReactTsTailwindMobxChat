@@ -1,46 +1,16 @@
-import { toArray, toHumanReadable } from "@/core/utils";
-import { TMessage } from "@/models/message";
-import { makeAutoObservable, observable, runInAction } from "mobx";
+import { toHumanReadable } from "@/core/utils";
+import { convs, TConversation } from "@/models/conversation";
+import { chatMessages } from "@/models/message";
+import { makeAutoObservable } from "mobx";
 
-const convs: TMessage[] = [
-    {
-        id: "995db14f-1359-4784-b27b-8ce3d7f34600",
-
-        content: "Riverpod Alternatives for React",
-        sender: "Abdullah",
-        role: "user",
-        updatedOn: new Date(),
-    },
-    {
-        id: "6736b91f-e3df-4738-bade-0582d732b2f6",
-        content: "Yolo Greetings and Assistance",
-        sender: "GPT-4o",
-        role: "agent",
-        updatedOn: new Date(),
-    },
-    {
-        id: "8f31f893-b2cd-46de-926c-c49ea5fe6652",
-        content: "Friendly Greetings and Assistance",
-        sender: "Abdullah",
-        role: "user",
-        updatedOn: new Date(),
-    },
-    {
-        id: "995db14f-1359-4784-b27b-8ce3d7f34601",
-        content: "Greeting and Assistance Inquiry",
-        sender: "Abdullah",
-        role: "user",
-        updatedOn: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000),
-    }
-]
 export class ChatStore {
-    conversationsLoading = true;
+    convsLoading = true;
     chatLoading = false;
-    conversations: TMessage[] = [];
-    activeConversation: TMessage | null = null;
-    
-    get conversationsByDate(): [string, TMessage[]][] {
-        const val = this.conversations.reduce((acc, curr) => {
+    convs: TConversation[] = [];
+    activeConv: TConversation | null = null;
+
+    get convsByDate(): [string, TConversation[]][] {
+        const val = this.convs.reduce((acc, curr) => {
             const key = toHumanReadable(curr.updatedOn);
             if (acc.has(key)) {
                 acc.get(key)?.push(curr);
@@ -48,32 +18,36 @@ export class ChatStore {
                 acc.set(key, [curr]);
             }
             return acc;
-        }, new Map<string, TMessage[]>());
-        console.log(val);
+        }, new Map<string, TConversation[]>());
         return [...val];
 
     }
-    get activeConversationId(): string | null {
-        return this.activeConversation?.id ?? null;
+    get activeConvId(): string | null {
+        return this.activeConv?.id ?? null;
     }
 
-    // private _conversations: TMessage[] = [];
-    // private _currentChat: TMessage | null = null;
+    // private _conversations: TConversation[] = [];
+    // private _currentChat: TConversation | null = null;
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    async loadConversations() {
-        // delay for 1000 seconds
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        this.conversations = convs;
-        this.conversationsLoading = false;
+    *loadConversations() {
+        yield new Promise(resolve => setTimeout(resolve, 2000));
+        this.convs = convs;
+        this.convsLoading = false;
 
     }
-    async loadChat(conversationId: string) {
-        const convo = this.conversations.find(c => c.id === conversationId);
+
+    *loadChat(conversationId: string) {
+        const convo = this.convs.find(c => c.id === conversationId);
         if (!convo) return;
-        this.activeConversation = convo;
+        this.chatLoading = true;
+        this.activeConv = convo;
+        yield new Promise(resolve => setTimeout(resolve, 2000));
+        this.activeConv.messages = chatMessages ?? [];
+        this.chatLoading = false;
+        
     }
 }
