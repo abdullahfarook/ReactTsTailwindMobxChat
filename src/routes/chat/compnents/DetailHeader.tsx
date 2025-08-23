@@ -1,7 +1,6 @@
 
 import { AppStore } from "@/stores/AppStore";
-import { NewChatIcon, Sidebar } from "@/svgs";
-import { TooltipAnchor } from "@ariakit/react";
+import { NewChatIcon, Sidebar } from "@/components/svgs";
 import { observer } from "mobx-react";
 import { useInstance } from "react-ioc";
 

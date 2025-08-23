@@ -1,7 +1,6 @@
 import Markdown from "@/components/Markdown";
 import { TMessage } from "@/models/message";
-import { OpenAIMinimalIcon, UserIcon } from "@/svgs";
-import ChatIcon from "@/svgs/ChatIcon";
+import { OpenAIMinimalIcon, UserIcon } from "@/components/svgs";
 import ReactMarkdown from "react-markdown";
 
 

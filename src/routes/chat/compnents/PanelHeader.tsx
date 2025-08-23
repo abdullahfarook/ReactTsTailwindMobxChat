@@ -1,6 +1,6 @@
 import { NavigationService } from "@/components/NavigationService";
 import { AppStore } from "@/stores/AppStore";
-import { NewChatIcon, Sidebar } from "@/svgs";
+import { NewChatIcon, Sidebar } from "@/components/svgs";
 import { useInstance } from "react-ioc"
 
 export default function PanelHeader() {
