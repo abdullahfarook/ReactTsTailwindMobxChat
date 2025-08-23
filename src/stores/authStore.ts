@@ -18,7 +18,7 @@ export class AuthStore {
         var delay = new Promise(resolve => setTimeout(resolve, 1000));
         await delay;
         this.isAuthenticated = true;
-        this.navigator.navigate('/chat/new');
+        this.navigator.goBack();
     }
     async login(user: string, password: string){
         const res = await this.apiService.post<string>('/login', {
