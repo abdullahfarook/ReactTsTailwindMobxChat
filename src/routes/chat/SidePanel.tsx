@@ -8,6 +8,7 @@ import cn from "@/core/utils";
 import NavItem from "./compnents/NavItem";
 import { NavigationService } from "@/components/NavigationService";
 import Spinner from "@/components/Spinner";
+import { TConversation } from "@/models/conversation";
 
 function SidePanel() {
     const app = useInstance(AppStore);
@@ -46,12 +47,7 @@ function SidePanel() {
                                                         "relative"
                                                 }}>
                                                     {chat.convsLoading && LoadingSpinner}
-                                                    {!chat.convsLoading && chat.convsByDate.map(([key, conversation]) =>
-                                                        <div key={key} style={{ "left": "0px", "top": "0px", "width": "100%" }}>
-                                                            <div className="mt-2 pl-2 pt-1 text-text-secondary" style={{ "fontSize": "0.7rem" }}>{key}</div>
-                                                            {conversation.map((conv) => <NavItem key={conv.id} id={conv.id} title={conv.title} active={chat.activeConvId == conv.id} onClick={() => navigator.navigate(`/chat/${conv.id}`)} />)}
-                                                        </div>
-                                                    )}
+                                                    {!chat.convsLoading && <Conversations data={chat.convsByDate} activeId={chat.activeConvId} />}
 
 
                                                 </div>
@@ -124,5 +120,22 @@ const LoadingSpinner = (
         <span className="animate-pulse text-text-primary ml-1">Loading...</span>
     </div>
 );
+
+const Conversations = (props: { data?: [string, TConversation[]][]; activeId?: string }) => {
+    const { data, activeId } = props;
+    const navigator = useInstance(NavigationService);
+    if (!data) return null;
+    return (
+        <>
+            {data.map(([time, conversation]) =>
+                <div key={time} style={{ "left": "0px", "top": "0px", "width": "100%" }}>
+                    <div className="mt-2 pl-2 pt-1 text-text-secondary" style={{ "fontSize": "0.7rem" }}>{time}</div>
+                    {conversation.map((conv) =>
+                        <NavItem key={conv.id} id={conv.id} title={conv.title} active={activeId == conv.id} onClick={() => navigator.navigate(`/chat/${conv.id}`)} />)}
+                </div>
+            )}
+        </>
+    );
+}
 
 export default observer(SidePanel);
