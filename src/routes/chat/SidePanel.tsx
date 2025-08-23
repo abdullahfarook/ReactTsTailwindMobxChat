@@ -6,8 +6,8 @@ import { ChatStore } from "@/stores/ChatStore";
 import { useEffect } from "react";
 import cn from "@/core/utils";
 import NavItem from "./compnents/NavItem";
-import Loading from "@/components/Loading";
 import { NavigationService } from "@/components/NavigationService";
+import Spinner from "@/components/Spinner";
 
 function SidePanel() {
     const app = useInstance(AppStore);
@@ -18,11 +18,11 @@ function SidePanel() {
         width: app.isSidebarOpen ? "260px" : "0px",
         transform: app.isSidebarOpen ? "translateX(0px)" : "translateX(-100%)",
     };
-    
+
     useEffect(() => {
         chat.loadConversations();
     }, []);
-    
+
     return <div data-testid="nav" className="nav active max-w-[320px] flex-shrink-0 transform overflow-x-hidden bg-surface-primary-alt transition-all duration-200 ease-in-out md:max-w-[260px]" style={navStyle}>
         <div className="h-full w-[320px] md:w-[260px]">
             <div className="flex h-full flex-col">
@@ -42,13 +42,13 @@ function SidePanel() {
                                                     "ltr", "height": "828px", "position": "relative", "width": "236px", "willChange": "transform", "overflow": "hidden", "outline": "none"
                                             }}>
                                                 <div className="ReactVirtualized__Grid__innerScrollContainer" role="row" style={{
-                                                    "width": "auto", "height": "208px", "maxWidth": "236px", "maxHeight": "208px",  "position":
+                                                    "width": "auto", "height": "208px", "maxWidth": "236px", "maxHeight": "208px", "position":
                                                         "relative"
                                                 }}>
-                                                    {chat.convsLoading && <Loading />}
+                                                    {chat.convsLoading && LoadingSpinner}
                                                     {!chat.convsLoading && chat.convsByDate.map(([key, conversation]) =>
-                                                        <div key={key} style={{"left": "0px",  "top": "0px", "width": "100%" }}>
-                                                            <div className="mt-2 pl-2 pt-1 text-text-secondary" style={{ "fontSize": "0.7rem" }}>{key}</div>    
+                                                        <div key={key} style={{ "left": "0px", "top": "0px", "width": "100%" }}>
+                                                            <div className="mt-2 pl-2 pt-1 text-text-secondary" style={{ "fontSize": "0.7rem" }}>{key}</div>
                                                             {conversation.map((conv) => <NavItem key={conv.id} id={conv.id} title={conv.title} active={chat.activeConvId == conv.id} onClick={() => navigator.navigate(`/chat/${conv.id}`)} />)}
                                                         </div>
                                                     )}
@@ -118,6 +118,11 @@ function SidePanel() {
         </div>
     </div>
 }
-
+const LoadingSpinner = (
+    <div className="flex flex-1 items-center justify-center" aria-live="polite" role="status">
+        <Spinner className="text-text-primary" />
+        <span className="animate-pulse text-text-primary ml-1">Loading...</span>
+    </div>
+);
 
 export default observer(SidePanel);
