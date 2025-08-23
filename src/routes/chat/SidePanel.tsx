@@ -7,16 +7,18 @@ import { useEffect } from "react";
 import cn from "@/core/utils";
 import NavItem from "./compnents/NavItem";
 import Loading from "@/components/Loading";
+import { NavigationService } from "@/components/NavigationService";
 
 function SidePanel() {
     const app = useInstance(AppStore);
     const chat = useInstance(ChatStore);
+    const navigator = useInstance(NavigationService);
 
     const navStyle: React.CSSProperties = {
         width: app.isSidebarOpen ? "260px" : "0px",
         transform: app.isSidebarOpen ? "translateX(0px)" : "translateX(-100%)",
     };
-
+    
     useEffect(() => {
         chat.loadConversations();
     }, []);
@@ -47,7 +49,7 @@ function SidePanel() {
                                                     {!chat.convsLoading && chat.convsByDate.map(([key, conversation]) =>
                                                         <div key={key} style={{"left": "0px",  "top": "0px", "width": "100%" }}>
                                                             <div className="mt-2 pl-2 pt-1 text-text-secondary" style={{ "fontSize": "0.7rem" }}>{key}</div>    
-                                                            {conversation.map((message) => <NavItem key={message.id} id={message.id} title={message.title} active={chat.activeConvId === message.id} onClick={() => chat.loadChat(message.id)} />)}
+                                                            {conversation.map((conv) => <NavItem key={conv.id} id={conv.id} title={conv.title} active={chat.activeConvId == conv.id} onClick={() => navigator.navigate(`/chat/${conv.id}`)} />)}
                                                         </div>
                                                     )}
 

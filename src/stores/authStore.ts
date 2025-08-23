@@ -18,18 +18,21 @@ export class AuthStore {
         var delay = new Promise(resolve => setTimeout(resolve, 1000));
         await delay;
         this.isAuthenticated = true;
-        this.navigator.navigate('/chat/0');
+        this.navigator.navigate('/chat/new');
     }
-    async login(user: string, password: string): Promise<TResult<boolean>> {
-        const res = await this.apiService.post<any>('/login', {
+    async login(user: string, password: string){
+        const res = await this.apiService.post<string>('/login', {
             user,
             password,
         });
-        if (res.success) {
-            localStorage.setItem('token', res.data.token);
+        if (res.success && res.data) {
+            localStorage.setItem('token', res.data);
             this.isAuthenticated = true;
         }
-        return res;
+        return {
+            success: res.success,
+            data: res.data,
+        };
     }
     async logout() {
         localStorage.removeItem('token');

@@ -6,7 +6,7 @@ import { useInstance } from "react-ioc";
  function DetailHeader() {
    const appStore = useInstance(AppStore);
    if(appStore.isSidebarOpen) return null;
-   return <div className="sticky top-0 z-10 flex h-14 items-center justify-between bg-white p-2 font-semibold text-text-primary dark:bg-gray-800 component-inspector-selected">
+   return <div className="sticky top-0 z-10 flex h-14 items-center justify-between bg-white p-2 font-semibold text-text-primary dark:bg-gray-800">
       <div className="hide-scrollbar flex w-full items-center justify-between gap-2 overflow-x-auto">
          <div className="mx-1 flex items-center gap-2">
             <div className="flex items-center gap-2 transition-all duration-200 ease-in-out translate-x-0 opacity-100">

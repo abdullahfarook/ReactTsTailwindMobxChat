@@ -1,24 +1,32 @@
 import React, { useEffect } from "react";
-import { NavigateFunction, Outlet, useNavigate } from "react-router-dom";
+import { NavigateFunction, Outlet, Params, useMatches, useNavigate, useParams } from "react-router-dom";
 import { useInstance } from "react-ioc";
 
-export class NavigationService{
-    nav!: NavigateFunction;
+export class NavigationService
+{
+    _nav!: NavigateFunction;
+    _params: Params<string> = {}
     setNavigator(nav: NavigateFunction) {
-        this.nav = nav;
+        this._nav = nav;
+    }
+    setParams(params: any) {
+      this._params = params;
     }
     navigate(to: string, options?: any) {
-        this.nav(to, options);
+        this._nav(to, options);
     }
     goBack() {
-        this.nav(-1);
+        this._nav(-1);
     }
 }
 
 
 export const NavigatorProvider: React.FC = () => {
   const navigate = useNavigate();
+  const params = useParams();
   const navService = useInstance(NavigationService);
+  navService.setParams(params);
+
   useEffect(() => {
     navService.setNavigator(navigate);
   }, [navigate, navService]);

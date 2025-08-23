@@ -1,16 +1,21 @@
+import { ApiService } from "@/core/api";
 import { toHumanReadable } from "@/core/utils";
 import { convs, TConversation } from "@/models/conversation";
-import { chatMessages } from "@/models/message";
-import { makeAutoObservable } from "mobx";
+import { chatMessages, TMessage } from "@/models/message";
+import { makeAutoObservable, observable, runInAction } from "mobx";
+import { inject } from "react-ioc";
 
 export class ChatStore {
+    apiService = inject(this, ApiService);
+
     convsLoading = true;
     chatLoading = false;
-    convs: TConversation[] = [];
-    activeConv: TConversation | null = null;
+    activeConvId?: string;
+    conversations: TConversation[] = [];
+    messages: TMessage[] = [];
 
     get convsByDate(): [string, TConversation[]][] {
-        const val = this.convs.reduce((acc, curr) => {
+        const val = this.conversations.reduce((acc, curr) => {
             const key = toHumanReadable(curr.updatedOn);
             if (acc.has(key)) {
                 acc.get(key)?.push(curr);
@@ -22,32 +27,28 @@ export class ChatStore {
         return [...val];
 
     }
-    get activeConvId(): string | null {
-        return this.activeConv?.id ?? null;
-    }
-
-    // private _conversations: TConversation[] = [];
-    // private _currentChat: TConversation | null = null;
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    *loadConversations() {
-        yield new Promise(resolve => setTimeout(resolve, 2000));
-        this.convs = convs;
-        this.convsLoading = false;
+    async loadConversations() {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        runInAction(() => {
+            this.conversations = convs;
+            this.convsLoading = false;
+        })
 
     }
 
-    *loadChat(conversationId: string) {
-        const convo = this.convs.find(c => c.id === conversationId);
-        if (!convo) return;
+    async loadChat(conversationId: string) {
+        this.activeConvId = conversationId;
         this.chatLoading = true;
-        this.activeConv = convo;
-        yield new Promise(resolve => setTimeout(resolve, 2000));
-        this.activeConv.messages = chatMessages ?? [];
-        this.chatLoading = false;
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        runInAction(() => {
+            this.messages = chatMessages.filter(m => m.conversationId === conversationId);
+            this.chatLoading = false;
+        })
         
     }
 }
