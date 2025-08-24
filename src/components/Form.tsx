@@ -4,7 +4,7 @@ import { Form, Formik, FormikValues } from "formik";
 
 export type FormProps<T> = {
     data: IForm<T>;
-    onSubmit: (values: T) => void | Promise<TResult> | Promise<void>;
+    onSubmit: (values: T) => any;
     children?: React.ReactNode;
 }
 export function InputForm<T extends FormikValues>(props: FormProps<T>) {

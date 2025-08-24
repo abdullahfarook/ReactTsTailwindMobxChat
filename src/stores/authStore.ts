@@ -3,15 +3,27 @@ import { action, computed, makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { ApiService } from "@/core/api";
 import { NavigationService } from "@/components/NavigationService";
-import { Validator } from "fluentvalidation-ts";
 import { FormValidator, IForm } from "@/models/iform";
 
 export class AuthStore {
     apiService = inject(this, ApiService);
     navigator = inject(this, NavigationService);
-    isAuthenticated: boolean = false;
+    isAuthenticated = false;
+    isAuthenticating = true;
     constructor() {
         makeAutoObservable(this);
+    }
+
+    async init() {
+        const token = localStorage.getItem('token');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        runInAction(() => {
+            if (token) {
+                this.isAuthenticated = true;
+            }
+            this.isAuthenticating = false;
+        })
+
     }
 
     loginDummy(email: string, password: string) {
@@ -20,16 +32,35 @@ export class AuthStore {
         this.isAuthenticated = true;
         this.navigator.goBack();
     }
+    
 
     async login(user: string, password: string) {
-        const res = await this.apiService.post<string>('/login', {
-            user,
-            password,
-        });
-        if (res.success && res.data) {
-            localStorage.setItem('token', res.data);
-            this.isAuthenticated = true;
+        const browserToken = localStorage.getItem(user);
+        const req: LoginRequest = {
+            email: user,
+            password: password,
+            browser2FaPersisted: browserToken != null,
+            browser2FaPersistenceToken: browserToken ?? ''
         }
+        const res = await this.apiService.post<LoginResponse>('/identity/account/Login', req);
+        if (!res.success) return res;
+        if(res.data?.requiresTwoFactor) return this.navigator.navigate('/login/2fa',);
+        localStorage.setItem('token', res.data!.authResponse.AccessToken);
+        runInAction(() => this.isAuthenticated = true );
+        this.navigator.goBack();
+
+    }
+
+    async login2fa(code: string) {
+        const res = await this.apiService.post<LoginResponse>('/identity/account/Login2fa', {
+            code,
+        });
+        if (!res.success) return res;
+
+        localStorage.setItem('token', res.data!.authResponse.AccessToken);
+        runInAction(() => this.isAuthenticated = true);
+        this.navigator.goBack(-2);
+
     }
     logout() {
         // localStorage.removeItem('token');
@@ -39,20 +70,3 @@ export class AuthStore {
 
 }
 
-export type LoginFormModel = { email: string, password: string };
-export class LoginFormValidator extends FormValidator<LoginFormModel> {
-
-    model: LoginFormModel = { email: "", password: "" };
-    constructor() {
-        super();
-        this.ruleFor('email')
-            .notEmpty()
-            .withMessage('Please enter your email')
-            .emailAddress()
-            .withMessage('Please enter a valid email');
-
-        this.ruleFor('password')
-            .notEmpty()
-            .withMessage('Please enter your password');
-    }
-}

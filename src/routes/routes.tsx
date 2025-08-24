@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate} from 'react-router-dom';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import MainLayout from '@/layouts/MainLayout';
-import { NavigatorProvider } from '@/components/NavigationService';
+import NavigatorProvider from '@/components/NavigationService';
 import LoginView from './auth/LoginView';
 import TwoFactorView from './auth/TwoFactorView';
 import NewChat from './chat/NewChat';

@@ -1,63 +1,76 @@
+import { ApiErrorResponse, ApiResponseWrapper, ApiSuccessResponse } from "@/models/responseWrapper";
+
 export class ApiService {
-    private baseUrl: string = "http://localhost:5000";
+    private baseUrl: string = "https://localhost:5001";
     // constructor(url: string) {
     //     if (!url || url == '') throw new Error('BaseApi: url is required');
     //     this.baseUrl = url;
     // }
-    public get<T>(input: RequestInfo): Promise<TResult<T>> {
+    public get<T>(input: RequestInfo): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input);
     }
-    public post<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
+    public post<T>(input: RequestInfo, body: any): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input, {
             method: 'POST',
             body: JSON.stringify(body),
         });
     }
-    public put<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
+    public put<T>(input: RequestInfo, body: any): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input, {
             method: 'PUT',
             body: JSON.stringify(body),
         });
     }
-    public patch<T>(input: RequestInfo, body: any): Promise<TResult<T>> {
+    public patch<T>(input: RequestInfo, body: any): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input, {
             method: 'PATCH',
             body: JSON.stringify(body),
         });
     }
-    public delete<T>(input: RequestInfo): Promise<TResult<T>> {
+    public delete<T>(input: RequestInfo): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input, {
             method: 'DELETE',
         });
     }
 
-    private async fetch<T>(input: RequestInfo, init?: RequestInit): Promise<TResult<T>> {
-        input = `${this.baseUrl}${input}`;
-        const token = localStorage.getItem('token');
+    private async fetch<T>(input: RequestInfo, init?: RequestInit): Promise<ApiResponseWrapper<T>> {
+        input = `${this.baseUrl}/api${input}`;
+        var headers = this.defaultHeaders();
+        headers = this.tryAuthToken(headers);
         try {
             const res = await fetch(input, {
-                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+                headers: headers,
                 ...init,
             });
+            const data = await res.json();
             if (!res.ok) {
-                return {
-                    success: false,
-                    message: res.statusText ?? await res.text(),
-                };
+                return new ApiResponseWrapper<T>(false, res.status, undefined, new ApiErrorResponse(data?.title, data?.errorMessage, data?.innerException, data?.validationErrors));
             }
-            return {
-                success: true,
-                data: await res.json()
-            }
-        } catch (error) {
-            return {
-                success: false,
-                message: 'Error occured while fetching data',
-            };
+            return new ApiResponseWrapper<T>(true, res.status, new ApiSuccessResponse<T>(data?.successMessage, data?.payload), undefined);
+        } catch (error: any) {
+            var message = error?.message ?? "Error occured while fetching data";
+            return new ApiResponseWrapper<T>(false, 0, undefined, new ApiErrorResponse(message, message));
         }
 
     }
+
+    private defaultHeaders(): Record<string, string> {
+        return {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        };
+    }
+    private tryAuthToken(headers: Record<string, string>): Record<string, string> {
+        const token = localStorage.getItem('token');
+        if (token) {
+            headers.Authorization = "Bearer " + token;
+        }
+        return headers;
+    }
 }
+
+
+
 // const api = new BaseApi(process.env.CATAILYST ?? '');
 // const api = new BaseApi("http://localhost:5000");
 // export default api;

@@ -1,3 +1,4 @@
+import Spinner from '@/components/Spinner';
 import { AuthStore } from '@/stores/AuthStore';
 import { observer } from 'mobx-react';
 import { useInstance } from 'react-ioc';
@@ -5,6 +6,7 @@ import { Navigate, Outlet} from 'react-router-dom';
 
 const MainLayout = () => {
     const auth = useInstance(AuthStore);
+
     if (auth.isAuthenticated) {
         return (
             <div id="root"  >

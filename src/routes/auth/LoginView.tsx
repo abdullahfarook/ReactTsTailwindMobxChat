@@ -1,8 +1,26 @@
 import { InputForm } from "@/components/Form";
-import { AuthStore, LoginFormValidator } from "@/stores/AuthStore";
+import { FormValidator } from "@/models/iform";
+import { AuthStore} from "@/stores/AuthStore";
 import { ErrorMessage, Field } from "formik";
 import { observer } from "mobx-react";
 import { provider, useInstance } from "react-ioc";
+export class LoginFormModel { email = ''; password = '' };
+export class LoginFormValidator extends FormValidator<LoginFormModel> {
+    model = new LoginFormModel();
+    constructor() {
+        super();
+        this.ruleFor('email')
+            .notEmpty()
+            .withMessage('Please enter your email')
+            // any email address that contains @
+            .must(val => val.includes('@'))
+            .withMessage('Please enter a valid email');
+
+        this.ruleFor('password')
+            .notEmpty()
+            .withMessage('Please enter your password');
+    }
+}
 function LoginView() {
     const auth = useInstance(AuthStore);
     const validator = useInstance(LoginFormValidator);
@@ -13,7 +31,7 @@ function LoginView() {
                 {validator.submitError && ServerError(validator.submitError!)}
                 <InputForm
                     data={validator}
-                    onSubmit={(val) => auth.loginDummy(val.email, val.password)}>
+                    onSubmit={(val) => auth.login(val.email, val.password)}>
                         <div className="mb-4 mt-6">
                             <div className="relative">
                                 <Field type="text" id="email" autoComplete="email" name="email" className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none" /><label htmlFor="email" className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-green-600 dark:peer-focus:text-green-500 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4">Email address</label></div>
@@ -41,6 +59,3 @@ const ServerError = (error: string) => (
     <div role="alert" aria-live="assertive" className="relative mt-6 rounded-xl border border-red-500/20 bg-red-50/50 px-6 py-4 text-red-700 shadow-sm transition-all dark:bg-red-950/30 dark:text-red-100 text-sm">{error}</div>
 )
 export default provider(LoginFormValidator)(observer(LoginView));
-
-
-
