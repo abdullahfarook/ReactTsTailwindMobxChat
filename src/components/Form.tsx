@@ -19,7 +19,7 @@ export function InputForm<T extends FormikValues>(props: FormProps<T>) {
     }
 
     const submitForm = async (values: T) => {
-        data.submitError = null;
+        data.setError(null);
         const result = await onSubmit(values);
         if (isTResult(result)) {
             if (!result.success) {
