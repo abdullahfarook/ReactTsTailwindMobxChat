@@ -30,24 +30,32 @@ export class ApiService {
             method: 'DELETE',
         });
     }
-    
+
     private async fetch<T>(input: RequestInfo, init?: RequestInit): Promise<TResult<T>> {
         input = `${this.baseUrl}${input}`;
         const token = localStorage.getItem('token');
-        const res = await fetch(input, {
-            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-            ...init,
-        });
-        if (!res.ok) {
+        try {
+            const res = await fetch(input, {
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+                ...init,
+            });
+            if (!res.ok) {
+                return {
+                    success: false,
+                    message: res.statusText ?? await res.text(),
+                };
+            }
+            return {
+                success: true,
+                data: await res.json()
+            }
+        } catch (error) {
             return {
                 success: false,
-                message: res.statusText?? await res.text(),
+                message: 'Error occured while fetching data',
             };
         }
-        return {
-            success: true,
-            data: await res.json()
-        }
+
     }
 }
 // const api = new BaseApi(process.env.CATAILYST ?? '');
