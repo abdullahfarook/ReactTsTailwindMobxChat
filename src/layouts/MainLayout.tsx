@@ -1,4 +1,5 @@
 import { AuthStore } from '@/stores/AuthStore';
+import { observer } from 'mobx-react';
 import { useInstance } from 'react-ioc';
 import { Navigate, Outlet} from 'react-router-dom';
 
@@ -17,4 +18,4 @@ const MainLayout = () => {
     return <Navigate to="/login" />
 }
 
-export default MainLayout;
+export default observer(MainLayout);

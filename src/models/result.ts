@@ -1,4 +1,5 @@
-type TResult<T> = {
+
+type TResult<T= void> = {
     success: boolean;
     data?: T;
     message?: string;
