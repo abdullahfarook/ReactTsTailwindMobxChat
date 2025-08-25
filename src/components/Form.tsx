@@ -20,18 +20,18 @@ export function InputForm<T extends FormikValues>(props: FormProps<T>) {
     }
 
     const submitForm = async (values: T) => {
-        data.setError(null);
+        data.setSubmitError(null);
         const result = await onSubmit(values);
         if (isTResult(result)) {
             if (!result.success) {
-                data.setError(result.message ?? null);
+                data.setSubmitError(result.message ?? null);
             }
         }
     }
     return (
         <Formik<T>
             initialValues={data.model}
-            validate={data.validate}
+            validate={values=> data.validateForm(values)}
             onSubmit={submitForm}>
             <Form>
                 {children}
