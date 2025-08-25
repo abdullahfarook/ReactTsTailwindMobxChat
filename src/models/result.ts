@@ -1,6 +1,6 @@
 
 type TResult<T= void> = {
     success: boolean;
-    data?: T;
+    payload?: T;
     message?: string;
 };

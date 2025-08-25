@@ -12,7 +12,7 @@ export class ApiResponseWrapper<T> implements TResult<T> {
     get success(): boolean {
         return this.isSuccessStatusCode;
     }
-    get data(): T | undefined {
+    get payload(): T | undefined {
         return this.isSuccessStatusCode ? this.apiSuccessResponse?.payload : undefined;
     }
     get message(): string | undefined {

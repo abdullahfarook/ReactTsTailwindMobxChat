@@ -1,15 +1,15 @@
 
-import { action, computed, makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { ApiService } from "@/core/api";
 import { NavigationService } from "@/components/NavigationService";
-import { FormValidator, IForm } from "@/models/iform";
 
 export class AuthStore {
     apiService = inject(this, ApiService);
     navigator = inject(this, NavigationService);
     isAuthenticated = false;
     isAuthenticating = true;
+    lastReq?:any;
     constructor() {
         makeAutoObservable(this);
     }
@@ -26,46 +26,47 @@ export class AuthStore {
 
     }
 
-    loginDummy(email: string, password: string) {
-        // const delay = new Promise(resolve => setTimeout(resolve, 1000));
-        // await delay;
-        this.isAuthenticated = true;
-        this.navigator.goBack();
-    }
-    
-
     async login(user: string, password: string) {
         const browserToken = localStorage.getItem(user);
+        const isPersisted = browserToken != null;
         const req: LoginRequest = {
             email: user,
             password: password,
-            browser2FaPersisted: browserToken != null,
+            browser2FaPersisted: isPersisted,
             browser2FaPersistenceToken: browserToken ?? ''
         }
         const res = await this.apiService.post<LoginResponse>('/identity/account/Login', req);
         if (!res.success) return res;
-        if(res.data?.requiresTwoFactor) return this.navigator.navigate('/login/2fa',);
-        localStorage.setItem('token', res.data!.authResponse.AccessToken);
-        runInAction(() => this.isAuthenticated = true );
+        if (res.payload?.requiresTwoFactor){
+            this.lastReq = res;
+            this.navigator.navigate('/login/2fa/'+user);
+            return;
+        }
+        localStorage.setItem('token', res.payload!.authResponse.AccessToken);
+        runInAction(() => this.isAuthenticated = true);
         this.navigator.goBack();
 
     }
 
-    async login2fa(code: string) {
-        const res = await this.apiService.post<LoginResponse>('/identity/account/Login2fa', {
-            code,
-        });
+    async login2fa(code: string, email: string) {
+        var req: LoginWith2FaRequest = {
+            userName: email,
+            twoFactorCode: code,
+            rememberBrowser: true,
+        }
+        if(this.lastReq?.password) req.password = this.lastReq.password;
+        const res = await this.apiService.post<LoginWith2FaResponse>('/identity/account/LoginWith2Fa', req);
         if (!res.success) return res;
 
-        localStorage.setItem('token', res.data!.authResponse.AccessToken);
+        localStorage.setItem('token', res.payload!.authResponse.AccessToken);
         runInAction(() => this.isAuthenticated = true);
         this.navigator.goBack(-2);
 
     }
+    
     logout() {
-        // localStorage.removeItem('token');
+        localStorage.removeItem('token');
         this.isAuthenticated = false;
-        console.log("logout");
     }
 
 }

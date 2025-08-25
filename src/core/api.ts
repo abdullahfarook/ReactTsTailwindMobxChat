@@ -42,6 +42,7 @@ export class ApiService {
                 headers: headers,
                 ...init,
             });
+            console.log(res);
             const data = await res.json();
             if (!res.ok) {
                 return new ApiResponseWrapper<T>(false, res.status, undefined, new ApiErrorResponse(data?.title, data?.errorMessage, data?.innerException, data?.validationErrors));

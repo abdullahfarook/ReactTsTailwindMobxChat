@@ -4,6 +4,7 @@ import { AuthStore } from "@/stores/AuthStore";
 import { Field, ErrorMessage } from "formik";
 import { observer } from "mobx-react";
 import { useInstance, provider } from "react-ioc";
+import { useParams } from "react-router-dom";
 export class TwoFactorFormModel { code = '' };
 export class TwoFactorFormValidator extends FormValidator<TwoFactorFormModel> {
     model = new TwoFactorFormModel();
@@ -17,6 +18,7 @@ export class TwoFactorFormValidator extends FormValidator<TwoFactorFormModel> {
 function TwoFactorView(){
     const auth = useInstance(AuthStore);
     const validator = useInstance(TwoFactorFormValidator);
+    const { email } = useParams();
     return (
         <div className="flex flex-grow items-center justify-center">
             <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
@@ -24,7 +26,7 @@ function TwoFactorView(){
                 {validator.submitError && ServerError(validator.submitError!)}
                 <InputForm
                     data={validator}
-                    onSubmit={(val) => auth.login2fa(val.code)}>
+                    onSubmit={(val) => auth.login2fa(val.code, email!)}>
                         <div className="mb-4 mt-6">
                             <div className="relative">
                                 <Field type="text" id="code" autoComplete="code" name="code" className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none" /><label htmlFor="code" className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-green-600 dark:peer-focus:text-green-500 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4">MFA Code</label></div>
