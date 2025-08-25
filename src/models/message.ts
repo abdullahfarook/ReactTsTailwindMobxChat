@@ -1,19 +1,21 @@
 
-export type TMessage = {
-  id: string;
-  conversationId: string;
-  sender: string;       // e.g. "Abdullah", "GPT-4o"
-  role: "user" | "agent";
-  responseType: "text" | "json" | "html" | "markdown"
-  content: string;      // message text
-  response?: TMessage | null;
+import {v4 as uuid} from 'uuid';
+export class Message {
+  id: string  = uuid();
+  conversationId!: string;
+  sender!: string;       // e.g. "Abdullah", "GPT-4o"
+  role: "user" | "agent" = "user";
+  responseType?: "text" | "json" | "html" | "markdown"  = "markdown";
+  content: string = '';      // message text
+  response?: Message | null;
   isComplete?: boolean;
-  isSuccess: boolean;
-  updatedOn: Date;
+  isSuccess: boolean = true ;
+  updatedOn: Date = new Date();
 };
 
+
 // Example data
-export const chatMessages: TMessage[] = [
+export const chatMessages: Message[] = [
   {
     id: "6736b91f-e3df-4738-bade-0582d732b2f7",
     conversationId: "995db14f-1359-4784-b27b-8ce3d7f34600",

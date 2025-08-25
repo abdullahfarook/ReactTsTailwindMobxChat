@@ -1,12 +1,12 @@
 import Markdown from "@/components/Markdown";
-import { TMessage } from "@/models/message";
+import { Message } from "@/models/message";
 import { OpenAIMinimalIcon, UserIcon } from "@/components/svgs";
 import ReactMarkdown from "react-markdown";
 
 
 
 type Props = {
-    data: TMessage;
+    data: Message;
 }
 
 export const Message = (props: Props) => {
@@ -73,7 +73,7 @@ export const Message = (props: Props) => {
 
 
 
-export const MessageItem = (message: TMessage) => {
+export const MessageItem = (message: Message) => {
     const isAgent = message.role === "agent";
 
     return (

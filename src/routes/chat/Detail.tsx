@@ -8,7 +8,7 @@ import ChatInput from "./compnents/ChatInput";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Spinner from "@/components/Spinner";
-import { TMessage } from "@/models/message";
+import { Message } from "@/models/message";
 import { SessionStore } from "@/stores/Session";
 
 export const Detail = observer(() => {
@@ -72,7 +72,7 @@ const LoadingSpinner = (
         {/* <span className="animate-pulse text-text-primary ml-1">Loading...</span> */}
     </div>
 );
-const Messages = (props: { data: TMessage[] }) => (
+const Messages = (props: { data: Message[] }) => (
     <div className="relative flex-1 overflow-hidden overflow-y-auto">
         {props.data?.map((message) => <Message key={message.id} data={message} />)}
     </div>

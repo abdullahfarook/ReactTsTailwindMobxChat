@@ -1,7 +1,7 @@
 import { ApiService } from "@/core/api";
 import { toHumanReadable } from "@/core/utils";
 import { convs, TConversation } from "@/models/conversation";
-import { chatMessages, TMessage } from "@/models/message";
+import { chatMessages, Message } from "@/models/message";
 import { makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import {v4 as uuid} from 'uuid';
@@ -17,8 +17,9 @@ export class ChatStore {
     chatLoading = false;
     activeConvId?: string;
     conversations: TConversation[] = [];
-    messages: TMessage[] = [];
-    allMessages: TMessage[] = [];
+    messages: Message[] = [];
+    allMessages: Message[] = [];
+    lastMessage: Message | undefined;
 
     get convsByDate(): [string, TConversation[]][] {
         const val = this.conversations?.reduce((acc, curr) => {
@@ -79,7 +80,9 @@ export class ChatStore {
             messages: [],
             
         }
-        const newMessage: TMessage = {
+        this.conversations.push(newConv);
+
+        const userMessage: Message = {
             id: uuid(),
             conversationId: newConv.id,
             sender: this.session.firstName,
@@ -88,11 +91,24 @@ export class ChatStore {
             isComplete: false,
             isSuccess: true,
             responseType: "markdown",
-            updatedOn: new Date(),
-            response: null
+            updatedOn: new Date()
         }
-        this.allMessages.push(newMessage);
-        this.conversations.push(newConv);
+        this.allMessages.push(userMessage);
+        
+        const agentMessage: Message = {
+            id: uuid(),
+            conversationId: newConv.id,
+            sender: "GPT-4o",
+            role: "agent",
+            content: '',
+            isComplete: false,
+            isSuccess: true,
+            updatedOn: new Date()
+        }
+        userMessage.response = agentMessage;
+        this.lastMessage = agentMessage;
+        this.allMessages.push(agentMessage);
+
         this.updateChatStore();
         this.nav.navigate(`/chat/${newConv.id}`);
     }
