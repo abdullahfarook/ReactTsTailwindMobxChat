@@ -1,6 +1,5 @@
 import { ChatStore } from "@/stores/ChatStore";
 import DetailHeader from "./compnents/DetailHeader";
-import { Message } from "./compnents/Message";
 import { useInstance } from "react-ioc";
 import { observer } from "mobx-react";
 /* @ts-ignore */
@@ -10,6 +9,7 @@ import { useParams } from "react-router-dom";
 import Spinner from "@/components/Spinner";
 import { Message } from "@/models/message";
 import { SessionStore } from "@/stores/Session";
+import { ChatMessage } from "./compnents/ChatMessage";
 
 export const Detail = observer(() => {
     const chat = useInstance(ChatStore);
@@ -74,6 +74,6 @@ const LoadingSpinner = (
 );
 const Messages = (props: { data: Message[] }) => (
     <div className="relative flex-1 overflow-hidden overflow-y-auto">
-        {props.data?.map((message) => <Message key={message.id} data={message} />)}
+        {props.data?.map((message) => <ChatMessage key={message.id} data={message} />)}
     </div>
 )

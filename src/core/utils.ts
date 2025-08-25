@@ -26,11 +26,18 @@ export function toHumanReadable(date: any): string {
     const diffDays = Math.floor(
         (startOfToday.getTime() - startOfDate.getTime()) / oneDay
     );
-
+// today, yesterday, previous 7 days, previous month, previous year
     if (diffDays === 0) return "Today";
     if (diffDays === 1) return "Yesterday";
+    // day
     if (diffDays > 1 && diffDays <= 7) return `Previous ${diffDays} days`;
-
+    // week
+    if (diffDays > 7 && diffDays <= 30) return `Previous ${Math.ceil(diffDays / 7)} weeks`;
+    // month
+    if (diffDays > 30 && diffDays <= 365) return `Previous ${Math.ceil(diffDays / 30)} months`;
+    // year
+    if (diffDays > 365) return `Previous ${Math.ceil(diffDays / 365)} years`;
+    
     // Fallback: show date string (you can format with Intl if you want locale support)
     return date.toLocaleDateString(undefined, {
         year: "numeric",
