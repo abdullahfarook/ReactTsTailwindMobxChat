@@ -3,7 +3,6 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { ApiService } from "@/core/api";
 import { NavigationService } from "@/components/NavigationService";
-import { v4 as uuid } from "uuid";
 import { SessionStore } from "./Session";
 import { jwtDecode } from "jwt-decode";
 import { error, ok, TResult } from "@/models/result";
@@ -62,7 +61,6 @@ export class AuthStore {
             rememberBrowser: true,
         }
         const res = await this.apiService.post<LoginWith2FaResponse>('/identity/account/LoginWith2Fa', req);
-        console.log(res);
         if (!res.success) return res;
         var auth = res.payload!.authResponse;
         this.session.setSession(auth);
@@ -70,7 +68,12 @@ export class AuthStore {
         this.navigator.navigate('/', { replace: true });
 
     }
-    async refreshSession(): Promise<TResult<string>> {
+    logout() {
+        this.session.removeSession();
+        this.navigator.navigate('/login', { replace: true });
+    }
+
+    private async refreshSession(): Promise<TResult<string>> {
         var token = this.session.tokens?.accessToken;
         if (!token) return error();
         if (!this.isExpired(token)) return ok(token);

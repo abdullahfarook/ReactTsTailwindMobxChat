@@ -29,17 +29,23 @@ export class SessionStore {
         runInAction(() => this.isAuthenticated = true);
     }
 
-    logout() {
+    removeSession() {
         this.removeTokens();
+        this.setFields({} as any);
         this.isAuthenticated = false;
     }
 
     private createSession(token: string) {
         const parsed = jwtDecode<any>(token);
+        this.setFields(parsed);
+    }
+
+    private setFields(parsed: any) {
         this.userId = parsed.sub;
         this.fullName = parsed.name;
         this.email = parsed.email;
     }
+
     private storeTokens(res: AuthResponse) {
         localStorage.setItem('accessToken', res.accessToken);
         localStorage.setItem('refreshToken', res.refreshToken);

@@ -1,5 +1,6 @@
 
 import { IForm } from "@/models/iform";
+import { TResult } from "@/models/result";
 import { Form, Formik, FormikValues } from "formik";
 
 export type FormProps<T> = {
