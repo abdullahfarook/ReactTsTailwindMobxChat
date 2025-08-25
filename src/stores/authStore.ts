@@ -44,7 +44,7 @@ export class AuthStore {
         if (!res.success) return res;
         if (res.payload?.requiresTwoFactor) {
             this.loginRequest = req;
-            this.navigator.navigate('/login/2fa/' + user);
+            this.navigator.navigate('/login/2fa');
             return;
         }
         localStorage.setItem('accessToken', res.payload!.authResponse.accessToken);
@@ -53,15 +53,16 @@ export class AuthStore {
 
     }
 
-    async login2fa(code: string, email: string) {
+    async login2fa(code: string) {
         var req: LoginWith2FaRequest = {
-            userName: email,
-            password: this.loginRequest?.password,
+            userName: this.loginRequest!.email,
+            password: this.loginRequest!.password,
             twoFactorCode: code,
             rememberBrowser: true,
         }
         const res = await this.apiService.post<LoginWith2FaResponse>('/identity/account/LoginWith2Fa', req);
         if (!res.success) return res;
+        this.loginRequest = undefined;
         var auth = res.payload!.authResponse;
         this.session.setSession(auth);
         runInAction(() => this.isAuthenticated = true);

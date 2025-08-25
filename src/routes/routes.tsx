@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
             element: <LoginView />,
           },
           {
-            path: 'login/2fa/:email',
+            path: 'login/2fa',
             element: <TwoFactorView />,
           },
         ],
