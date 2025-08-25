@@ -14,7 +14,10 @@ export class TwoFactorFormValidator extends FormValidator<TwoFactorFormModel> {
         super();
         this.ruleFor('code')
             .notEmpty()
-            .withMessage('Please enter your code');
+            .withMessage('Please enter your code')
+            .must(val => val.length === 6)
+            .withMessage('Please enter a valid code')
+            ;
     }
 }
 function TwoFactorView() {
@@ -26,7 +29,7 @@ function TwoFactorView() {
         if (!auth.isLoggedInCompleted) {
             nav.navigate('/login');
         }
-    }, [auth.isLoggedInCompleted]);
+    }, []);
 
     return (
         <div className="flex flex-grow items-center justify-center">

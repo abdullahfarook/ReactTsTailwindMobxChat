@@ -62,11 +62,13 @@ export class AuthStore {
         }
         const res = await this.apiService.post<LoginWith2FaResponse>('/identity/account/LoginWith2Fa', req);
         if (!res.success) return res;
-        this.loginRequest = undefined;
         var auth = res.payload!.authResponse;
         this.session.setSession(auth);
-        runInAction(() => this.isAuthenticated = true);
-        this.navigator.navigate('/', { replace: true });
+        runInAction(() => {
+            this.isAuthenticated = true
+            this.loginRequest = undefined;
+        });
+        this.navigator.navigate('/');
 
     }
     logout() {

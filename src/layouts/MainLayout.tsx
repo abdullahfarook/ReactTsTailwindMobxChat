@@ -1,13 +1,12 @@
-import Spinner from '@/components/Spinner';
-import { AuthStore } from '@/stores/AuthStore';
+import { SessionStore } from '@/stores/Session';
 import { observer } from 'mobx-react';
 import { useInstance } from 'react-ioc';
 import { Navigate, Outlet} from 'react-router-dom';
 
 const MainLayout = () => {
-    const auth = useInstance(AuthStore);
+    const session = useInstance(SessionStore);
 
-    if (auth.isAuthenticated) {
+    if (session.isAuthenticated) {
         return (
             <div id="root"  >
                 <div className="flex" style={{ "height": "calc(0px + 100dvh)" }}>
