@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import { Location, NavigateFunction, NavigateOptions, Outlet, Params, useLocation, useMatches, useNavigate, useParams } from "react-router-dom";
+import { Location, NavigateFunction, Outlet, Params, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useInstance } from "react-ioc";
 import { AuthStore } from "@/stores/AuthStore";
 import Spinner from "./Spinner";
 import { observer } from "mobx-react";
 
 export class NavigationService {
-  
+
   _nav!: NavigateFunction;
   _params: Params<string> = {}
   _location!: Location<any>;
@@ -19,7 +19,7 @@ export class NavigationService {
   setLocation(location: Location<any>) {
     this._location = location;
   }
-  navigate(to: string, options?: NavigateOptions) {
+  navigate(to: string, options?: any) {
     this._nav(to, options);
   }
   goBack(i = -1) {
@@ -28,7 +28,7 @@ export class NavigationService {
 }
 
 
-const NavigatorProvider: React.FC = () => {
+function NavigatorProvider() {
   const location = useLocation();
   const navigate = useNavigate();
   const params = useParams();
@@ -55,6 +55,6 @@ const NavigatorProvider: React.FC = () => {
 
 
   return <Outlet />;
-};
+}
 
 export default observer(NavigatorProvider)

@@ -1,4 +1,5 @@
 import { ApiErrorResponse, ApiResponseWrapper, ApiSuccessResponse } from "@/models/responseWrapper";
+import camelcaseKeys from "camelcase-keys";
 
 export class ApiService {
     private baseUrl: string = "https://localhost:5001";
@@ -43,7 +44,7 @@ export class ApiService {
                 ...init,
             });
             console.log(res);
-            const data = await res.json();
+            const data = camelcaseKeys(await res.json(), { deep: true }); ;
             if (!res.ok) {
                 return new ApiResponseWrapper<T>(false, res.status, undefined, new ApiErrorResponse(data?.title, data?.errorMessage, data?.innerException, data?.validationErrors));
             }
@@ -62,7 +63,7 @@ export class ApiService {
         };
     }
     private tryAuthToken(headers: Record<string, string>): Record<string, string> {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken');
         if (token) {
             headers.Authorization = "Bearer " + token;
         }

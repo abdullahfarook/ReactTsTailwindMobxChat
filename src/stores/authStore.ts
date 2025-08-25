@@ -3,25 +3,31 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { ApiService } from "@/core/api";
 import { NavigationService } from "@/components/NavigationService";
+import { v4 as uuid } from "uuid";
+import { SessionStore } from "./Session";
+import { jwtDecode } from "jwt-decode";
+import { error, ok, TResult } from "@/models/result";
 
 export class AuthStore {
     apiService = inject(this, ApiService);
     navigator = inject(this, NavigationService);
+    session = inject(this, SessionStore);
     isAuthenticated = false;
     isAuthenticating = true;
-    lastReq?:any;
+    loginRequest?: LoginRequest;
+    get isLoggedInCompleted(): boolean {
+        return this.loginRequest != null;
+    }
     constructor() {
         makeAutoObservable(this);
     }
 
     async init() {
-        const token = localStorage.getItem('token');
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const res = await this.refreshSession();
         runInAction(() => {
-            if (token) {
-                this.isAuthenticated = true;
-            }
             this.isAuthenticating = false;
+            if (!res.success) return;
+            this.isAuthenticated = true;
         })
 
     }
@@ -37,12 +43,12 @@ export class AuthStore {
         }
         const res = await this.apiService.post<LoginResponse>('/identity/account/Login', req);
         if (!res.success) return res;
-        if (res.payload?.requiresTwoFactor){
-            this.lastReq = res;
-            this.navigator.navigate('/login/2fa/'+user);
+        if (res.payload?.requiresTwoFactor) {
+            this.loginRequest = req;
+            this.navigator.navigate('/login/2fa/' + user);
             return;
         }
-        localStorage.setItem('token', res.payload!.authResponse.AccessToken);
+        localStorage.setItem('accessToken', res.payload!.authResponse.accessToken);
         runInAction(() => this.isAuthenticated = true);
         this.navigator.goBack();
 
@@ -51,23 +57,36 @@ export class AuthStore {
     async login2fa(code: string, email: string) {
         var req: LoginWith2FaRequest = {
             userName: email,
+            password: this.loginRequest?.password,
             twoFactorCode: code,
             rememberBrowser: true,
         }
-        if(this.lastReq?.password) req.password = this.lastReq.password;
         const res = await this.apiService.post<LoginWith2FaResponse>('/identity/account/LoginWith2Fa', req);
+        console.log(res);
         if (!res.success) return res;
-
-        localStorage.setItem('token', res.payload!.authResponse.AccessToken);
+        var auth = res.payload!.authResponse;
+        this.session.setSession(auth);
         runInAction(() => this.isAuthenticated = true);
-        this.navigator.goBack(-2);
+        this.navigator.navigate('/', { replace: true });
 
     }
-    
-    logout() {
-        localStorage.removeItem('token');
-        this.isAuthenticated = false;
+    async refreshSession(): Promise<TResult<string>> {
+        var token = this.session.tokens?.accessToken;
+        if (!token) return error();
+        if (!this.isExpired(token)) return ok(token);
+        await this.refreshAuthTokens();
+        return ok(this.session.tokens.accessToken);
     }
-
+    private async refreshAuthTokens(){
+        const req: RefreshTokenRequest = { ...this.session.tokens };
+        const res = await this.apiService.post<AuthResponse>('/identity/account/RefreshToken', req);
+        if (!res.success) return;
+        this.session.setSession(res.payload!);
+    }
+    private isExpired(token: string): boolean {
+        const parsed = jwtDecode<any>(token);
+        const exp = parsed.exp;
+        return exp < Date.now() / 1000;
+    }
 }
 

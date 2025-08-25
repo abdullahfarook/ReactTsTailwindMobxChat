@@ -4,7 +4,7 @@ import { AuthStore} from "@/stores/AuthStore";
 import { ErrorMessage, Field } from "formik";
 import { observer } from "mobx-react";
 import { provider, useInstance } from "react-ioc";
-export class LoginFormModel { email = ''; password = '' };
+export class LoginFormModel { email = ''; password = '' }
 export class LoginFormValidator extends FormValidator<LoginFormModel> {
     model = new LoginFormModel();
     constructor() {

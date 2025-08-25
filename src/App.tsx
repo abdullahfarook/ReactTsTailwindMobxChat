@@ -8,6 +8,7 @@ import { AuthStore } from "./stores/AuthStore";
 import { NavigationService} from "./components/NavigationService";
 import { ChatStore } from "./stores/ChatStore";
 import { AppStore } from "./stores/AppStore";
+import { SessionStore } from "./stores/Session";
 
 // export const StoreContext = createContext<RootStore>({} as RootStore);
 // export const StoreProvider = StoreContext.Provider;
@@ -17,7 +18,8 @@ import { AppStore } from "./stores/AppStore";
   AppStore,
   ApiService,
   AuthStore, 
-  ChatStore, 
+  ChatStore,
+  SessionStore, 
   NavigationService)
 export default class App extends Component {
   render() {
