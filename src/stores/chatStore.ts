@@ -1,10 +1,10 @@
 import { ApiService } from "@/core/api";
 import { toHumanReadable } from "@/core/utils";
-import { convs, TConversation } from "@/models/conversation";
-import { chatMessages, Message } from "@/models/message";
+import { TConversation } from "@/models/conversation";
+import { Message } from "@/models/message";
 import { makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
-import {v4 as uuid} from 'uuid';
+import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
 import { NavStore } from "@/stores/NavStore";
 
@@ -22,7 +22,9 @@ export class ChatStore {
     lastMessage: Message | undefined;
 
     get convsByDate(): [string, TConversation[]][] {
-        const val = this.conversations?.reduce((acc, curr) => {
+        // sort descending
+        const convs = this.conversations?.slice()?.sort((a, b) => new Date(b.updatedOn).getTime() - new Date(a.updatedOn).getTime());
+        const val = convs.slice()?.toSorted()?.reduce((acc, curr) => {
             const key = toHumanReadable(curr.updatedOn);
             if (acc.has(key)) {
                 acc.get(key)?.push(curr);
@@ -30,9 +32,8 @@ export class ChatStore {
                 acc.set(key, [curr]);
             }
             return acc;
-        }, new Map<string, TConversation[]>())??[];
+        }, new Map<string, TConversation[]>()) ?? [];
         return [...val];
-
     }
 
     constructor() {
@@ -41,7 +42,7 @@ export class ChatStore {
 
     async loadConversations() {
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         runInAction(() => {
             this.conversations = localStorage.getItem('conversations') ? JSON.parse(localStorage.getItem('conversations')!) : [];
             this.allMessages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
@@ -51,7 +52,7 @@ export class ChatStore {
     }
 
     async loadChat(conversationId: string) {
-        if(conversationId === 'new'){
+        if (conversationId === 'new') {
             this.activeConvId = undefined
             return;
         }
@@ -65,7 +66,7 @@ export class ChatStore {
 
     }
     async submitChatMessage(message: string) {
-        if(!this.activeConvId ){
+        if (!this.activeConvId) {
             this.createConversation(message);
         }
 
@@ -78,7 +79,7 @@ export class ChatStore {
             title: message.split(' ').slice(0, 4).join(' '),
             updatedOn: new Date(),
             messages: [],
-            
+
         }
         this.conversations.push(newConv);
 
@@ -93,19 +94,19 @@ export class ChatStore {
             responseType: "markdown",
             updatedOn: new Date()
         }
-        this.allMessages.push(userMessage);
-        
         const agentMessage: Message = {
             id: uuid(),
-            conversationId: newConv.id,
+            parentId: userMessage.id,
             sender: "GPT-4o",
             role: "agent",
-            content: '',
+           
             isComplete: false,
             isSuccess: true,
             updatedOn: new Date()
         }
         userMessage.response = agentMessage;
+        this.allMessages.push(userMessage);
+
         this.lastMessage = agentMessage;
         this.allMessages.push(agentMessage);
 
@@ -113,7 +114,7 @@ export class ChatStore {
         this.nav.navigate(`/chat/${newConv.id}`);
     }
 
-    updateChatStore(){
+    updateChatStore() {
         this.updateConversations();
         this.updateMessages();
     }

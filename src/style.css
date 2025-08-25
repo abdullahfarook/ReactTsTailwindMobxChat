@@ -2069,10 +2069,11 @@ html {
     Cantarell,
     Noto Sans,
     sans-serif;
-  line-height: normal;
-  margin-left: 0.25rem;
+  line-height: 1;
+  margin-left: 0.30rem;
   vertical-align: middle;
-  font-size: 0.5rem;
+  font-size: 0.8rem;
+  animation: pulseSize 1.25s ease-in-out infinite;
 }
 
 @supports (selector(:has(*))) {

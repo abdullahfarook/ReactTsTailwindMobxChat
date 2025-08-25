@@ -10,8 +10,9 @@ import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import supersub from "remark-supersub";
 import { unicodeCitation } from "./markdown/plugin";
+import cn from "@/core/utils";
 
-const Code = ({ children }: { children?: string }) => {
+const Code = ({ children, isStreaming }: { children?: string, isStreaming?: boolean }) => {
  const remarkPlugins: Pluggable[] = [
   supersub,
   remarkGfm,
@@ -20,7 +21,7 @@ const Code = ({ children }: { children?: string }) => {
   [remarkMath, { singleDollarTextMath: false }],
   unicodeCitation,
 ];
-
+console.log(children);
  const rehypePlugins = useMemo(
   () => [
     [rehypeKatex],
@@ -42,7 +43,9 @@ const Code = ({ children }: { children?: string }) => {
                 className="text-message flex min-h-[20px] flex-col items-start gap-3 overflow-visible [.text-message+&]:mt-5"
                 dir="auto"
             >
-                <div className="markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-100">
+                <div className={cn("markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-100",
+                    isStreaming && "result-streaming"
+                )}>
                 <ReactMarkdown
                     /* @ts-ignore */
                     rehypePlugins={rehypePlugins}
@@ -58,7 +61,7 @@ const Code = ({ children }: { children?: string }) => {
                         }
                     }
                 >
-                    {children}
+                    {children ?? "&#8232;"}
                 </ReactMarkdown>
                 </div>
 

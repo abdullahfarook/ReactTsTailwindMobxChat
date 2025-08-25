@@ -2,12 +2,13 @@
 import {v4 as uuid} from 'uuid';
 export class Message {
   id: string  = uuid();
-  conversationId!: string;
+  conversationId?: string;
+  parentId?: string;
   sender!: string;       // e.g. "Abdullah", "GPT-4o"
   role: "user" | "agent" = "user";
   responseType?: "text" | "json" | "html" | "markdown"  = "markdown";
-  content: string = '';      // message text
-  response?: Message | null;
+  content?: string;      // message text
+  response?: Message;
   isComplete?: boolean;
   isSuccess: boolean = true ;
   updatedOn: Date = new Date();
