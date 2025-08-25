@@ -21,7 +21,6 @@ const Code = ({ children, isStreaming }: { children?: string, isStreaming?: bool
   [remarkMath, { singleDollarTextMath: false }],
   unicodeCitation,
 ];
-console.log(children);
  const rehypePlugins = useMemo(
   () => [
     [rehypeKatex],
