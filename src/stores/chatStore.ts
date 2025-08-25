@@ -18,6 +18,7 @@ export class ChatStore {
     activeConvId?: string;
     conversations: TConversation[] = [];
     messages: TMessage[] = [];
+    allMessages: TMessage[] = [];
 
     get convsByDate(): [string, TConversation[]][] {
         const val = this.conversations?.reduce((acc, curr) => {
@@ -42,7 +43,7 @@ export class ChatStore {
         
         runInAction(() => {
             this.conversations = localStorage.getItem('conversations') ? JSON.parse(localStorage.getItem('conversations')!) : [];
-            this.messages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
+            this.allMessages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
             this.convsLoading = false;
         })
 
@@ -55,9 +56,9 @@ export class ChatStore {
         }
         this.activeConvId = conversationId;
         this.chatLoading = true;
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         runInAction(() => {
-            this.messages = chatMessages.filter(m => m.conversationId === conversationId);
+            this.messages = this.allMessages.filter(m => m.conversationId === conversationId);
             this.chatLoading = false;
         })
 
@@ -90,14 +91,15 @@ export class ChatStore {
             updatedOn: new Date(),
             response: null
         }
-        this.messages.push(newMessage);
-        newConv.messages?.push(newMessage);
+        this.allMessages.push(newMessage);
         this.conversations.push(newConv);
+        this.updateChatStore();
+        this.nav.navigate(`/chat/${newConv.id}`);
+    }
 
+    updateChatStore(){
         this.updateConversations();
         this.updateMessages();
-
-        this.nav.navigate(`/chat/${newConv.id}`);
     }
 
     updateConversations() {
@@ -107,6 +109,6 @@ export class ChatStore {
 
     updateMessages() {
         // in local storage
-        localStorage.setItem('messages', JSON.stringify(this.messages));
+        localStorage.setItem('messages', JSON.stringify(this.allMessages));
     }
 }

@@ -23,13 +23,11 @@ function AppLayout() {
         navService.setLocation(location);
     }, [location]);
 
-
     if (auth.isAuthenticating) {
         return <div className="flex flex-1 h-screen items-center justify-center" aria-live="polite" role="status">
             <Spinner className="text-text-primary" />
         </div>
     }
-
 
     return <Outlet />;
 }
