@@ -1,17 +1,16 @@
 import { createBrowserRouter, Navigate} from 'react-router-dom';
 import { AuthLayout } from '@/layouts/AuthLayout';
-import MainLayout from '@/layouts/MainLayout';
-import NavigatorProvider from '@/components/NavigationService';
 import LoginView from './auth/LoginView';
 import TwoFactorView from './auth/TwoFactorView';
-import NewChat from './chat/NewChat';
+import AppLayout from '@/layouts/AppLayout';
 import ChatLayout from '@/layouts/ChatLayout';
-import Detail from './chat/Detail';
+import MainLayout from '@/layouts/MainLayout';
+import { Detail } from './chat/Detail';
 
 
 export const router = createBrowserRouter([
   {
-    element: <NavigatorProvider />,
+    element: <AppLayout />,
     children: [
       {
         path: '/',
@@ -39,10 +38,6 @@ export const router = createBrowserRouter([
             path: 'chat',
             element: <ChatLayout />,
             children: [
-              {
-                path: 'new',
-                element: <NewChat />,
-              },
               {
                 path: ':conversationId',
                 element: <Detail />,

@@ -9,7 +9,7 @@ type Props = {
     data: TMessage;
 }
 
-export const Original = (props: Props) => {
+export const Message = (props: Props) => {
     const message = props.data;
     
     return <>

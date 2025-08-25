@@ -2,14 +2,14 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { ApiService } from "@/core/api";
-import { NavigationService } from "@/components/NavigationService";
+import { NavStore } from "@/stores/NavStore";
 import { SessionStore } from "./Session";
 import { jwtDecode } from "jwt-decode";
 import { fail, ok, TResult } from "@/models/result";
 
 export class AuthStore {
     apiService = inject(this, ApiService);
-    navigator = inject(this, NavigationService);
+    navigator = inject(this, NavStore);
     session = inject(this, SessionStore);
     isAuthenticated = false;
     isAuthenticating = true;

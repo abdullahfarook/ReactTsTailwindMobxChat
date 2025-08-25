@@ -15,10 +15,10 @@ export default function cn(...inputs: ClassValue[]) {
  * @param date
  * @returns string representation of human readable date
  */
-export function toHumanReadable(date: Date): string {
+export function toHumanReadable(date: any): string {
     const now = new Date();
     const oneDay = 1000 * 60 * 60 * 24;
-
+    date = new Date(date);
     // Normalize times (remove hours/minutes/seconds)
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
