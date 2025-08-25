@@ -18,7 +18,7 @@ export const Original = (props: Props) => {
                 <div id="c4339f98-5da5-454c-b221-4b2814fcfc3a" aria-label="message-6-c4339f98-5da5-454c-b221-4b2814fcfc3a" className="group mx-auto flex flex-1 gap-3 transition-all duration-300 transform-gpu md:max-w-[47rem] xl:max-w-[55rem] focus:outline-none focus:ring-2 focus:ring-border-xheavy message-render">
                     <div className="relative flex flex-shrink-0 flex-col items-center">
                         <div className="flex h-6 w-6 items-center justify-center overflow-hidden rounded-full">
-                            <div title="Abdullah" className="relative flex items-center justify-center" style={{ "width": "28.8px", "height": "28.8px" }}>
+                            <div  className="relative flex items-center justify-center" style={{ "width": "28.8px", "height": "28.8px" }}>
                                 <div className="relative flex h-9 w-9 items-center justify-center rounded-sm p-1 text-white" style={{
                                     "backgroundColor": "rgb(121, 137, 255)", "width": "20px", "height": "20px", "boxShadow":
                                         "rgba(240, 246, 252, 0.1) 0px 0px 0px 1px"

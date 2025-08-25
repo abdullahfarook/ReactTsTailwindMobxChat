@@ -2,12 +2,16 @@ import { ApiService } from "@/core/api";
 import { action, makeObservable, observable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { jwtDecode } from "jwt-decode";
+import camelcaseKeys from "camelcase-keys";
 export class SessionStore {
     api = inject(this, ApiService);
     isAuthenticated = false;
     userId!: string;
     fullName!: string;
-    email!: string;
+
+    get firstName(): string {
+        return this.fullName?.split(' ')?.[0];
+    }
     
     constructor() {
         makeObservable(this, {
@@ -36,14 +40,13 @@ export class SessionStore {
     }
 
     private createSession(token: string) {
-        const parsed = jwtDecode<any>(token);
+        const parsed = camelcaseKeys(jwtDecode<any>(token));;
         this.setFields(parsed);
     }
 
     private setFields(parsed: any) {
         this.userId = parsed.sub;
-        this.fullName = parsed.name;
-        this.email = parsed.email;
+        this.fullName = parsed.fullName;
     }
 
     private storeTokens(res: AuthResponse) {

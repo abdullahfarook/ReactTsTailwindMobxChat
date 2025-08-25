@@ -43,7 +43,7 @@ export class ApiService {
                 headers: headers,
                 ...init,
             });
-            const data = camelcaseKeys(await res.json(), { deep: true }); ;
+            const data = camelcaseKeys(await res.json(), { deep: true });
             if (!res.ok) {
                 return new ApiResponseWrapper<T>(false, res.status, undefined, new ApiErrorResponse(data?.title, data?.errorMessage, data?.innerException, data?.validationErrors));
             }
