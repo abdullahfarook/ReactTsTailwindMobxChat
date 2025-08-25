@@ -5,7 +5,7 @@ import { ApiService } from "@/core/api";
 import { NavigationService } from "@/components/NavigationService";
 import { SessionStore } from "./Session";
 import { jwtDecode } from "jwt-decode";
-import { error, ok, TResult } from "@/models/result";
+import { fail, ok, TResult } from "@/models/result";
 
 export class AuthStore {
     apiService = inject(this, ApiService);
@@ -47,7 +47,7 @@ export class AuthStore {
             this.navigator.navigate('/login/2fa');
             return;
         }
-        localStorage.setItem('accessToken', res.payload!.authResponse.accessToken);
+        this.session.setSession(res.payload!.authResponse);
         runInAction(() => this.isAuthenticated = true);
         this.navigator.goBack();
 
@@ -68,7 +68,7 @@ export class AuthStore {
             this.isAuthenticated = true
             this.loginRequest = undefined;
         });
-        this.navigator.navigate('/');
+        this.navigator.navigate('/',{ replace: true });
 
     }
     logout() {
@@ -77,17 +77,19 @@ export class AuthStore {
     }
 
     private async refreshSession(): Promise<TResult<string>> {
-        var token = this.session.tokens?.accessToken;
-        if (!token) return error();
-        if (!this.isExpired(token)) return ok(token);
-        await this.refreshAuthTokens();
+        // var token = this.session.tokens?.accessToken;
+        // if (!token) return failed();
+        // if (!this.isExpired(token)) return success(token);
+        const tokens = await this.refreshAuthTokens();
+        if (!tokens) return fail();
+        this.session.setSession(tokens);
         return ok(this.session.tokens.accessToken);
     }
-    private async refreshAuthTokens(){
+    private async refreshAuthTokens(): Promise<AuthResponse | undefined> {
         const req: RefreshTokenRequest = { ...this.session.tokens };
         const res = await this.apiService.post<AuthResponse>('/identity/account/RefreshToken', req);
         if (!res.success) return;
-        this.session.setSession(res.payload!);
+        return res.payload;
     }
     private isExpired(token: string): boolean {
         const parsed = jwtDecode<any>(token);

@@ -11,7 +11,7 @@ export function ok<T = void>(payload?: T): TResult<T> {
     }
 }
 
-export function error<T = void>(message?: string): TResult<T> {
+export function fail<T = void>(message?: string): TResult<T> {
     return {
         success: false,
         message: message,
