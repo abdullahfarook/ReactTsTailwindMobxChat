@@ -1,4 +1,4 @@
-import { NavStore } from "@/stores/NavStore";
+import { NavigationSrv } from "@/services/NavigationSrv";
 import Spinner from "@/components/Spinner";
 import { AuthStore } from "@/stores/AuthStore";
 import { observer } from "mobx-react";
@@ -10,7 +10,7 @@ function AppLayout() {
     const location = useLocation();
     const navigate = useNavigate();
     const params = useParams();
-    const navService = useInstance(NavStore);
+    const navService = useInstance(NavigationSrv);
     const auth = useInstance(AuthStore)
 
     useEffect(() => {

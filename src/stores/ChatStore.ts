@@ -6,7 +6,7 @@ import { computed, makeObservable, observable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
-import { NavStore } from "@/stores/NavStore";
+import { NavigationSrv } from "@/services/NavigationSrv";
 import { ChatHub, WebSocketInferenceString } from "@/hubs/ChatHub";
 import { IStreamResult } from "@microsoft/signalr";
 
@@ -14,7 +14,7 @@ export class ChatStore {
     // injects
     apiService = inject(this, ApiService);
     session = inject(this, SessionStore);
-    nav = inject(this, NavStore);
+    nav = inject(this, NavigationSrv);
     chatHub = new ChatHub(`${this.apiService.baseUrl}/Hubs/ChatServicesHub`,async ()=> this.session.tokens.accessToken);
 
     // observables
@@ -99,6 +99,7 @@ export class ChatStore {
     }
 
     createNewConversation(message: string) {
+        runInAction(() => this.chatLoading = true);
         const newConv: TConversation = this.createNewConv(message);
         const messages = [...newConv.messages??[]];
         newConv.messages = undefined;

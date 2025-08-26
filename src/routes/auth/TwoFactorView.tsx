@@ -1,5 +1,5 @@
 import { InputForm } from "@/components/Form";
-import { NavStore } from "@/stores/NavStore";
+import { NavigationSrv } from "@/services/NavigationSrv";
 import { FormValidator } from "@/models/iform";
 import { AuthStore } from "@/stores/AuthStore";
 import { Field, ErrorMessage } from "formik";
@@ -23,7 +23,7 @@ export class TwoFactorFormValidator extends FormValidator<TwoFactorFormModel> {
 function TwoFactorView() {
     const auth = useInstance(AuthStore);
     const validator = useInstance(TwoFactorFormValidator);
-    const nav = useInstance(NavStore);
+    const nav = useInstance(NavigationSrv);
 
     useEffect(() => {
         if (!auth.isLoggedInCompleted) {

@@ -6,7 +6,7 @@ import { ChatStore } from "@/stores/ChatStore";
 import { useEffect } from "react";
 import cn from "@/core/utils";
 import NavItem from "./compnents/NavItem";
-import { NavStore } from "@/stores/NavStore";
+import { NavigationSrv } from "@/services/NavigationSrv";
 import Spinner from "@/components/Spinner";
 import { TConversation } from "@/models/conversation";
 import { AuthStore } from "@/stores/AuthStore";
@@ -126,7 +126,7 @@ const LoadingSpinner = (
 
 const Conversations = (props: { data?: [string, TConversation[]][]; activeId?: string }) => {
     const { data, activeId } = props;
-    const navigator = useInstance(NavStore);
+    const navigator = useInstance(NavigationSrv);
     if (!data) return null;
     return (
         <>

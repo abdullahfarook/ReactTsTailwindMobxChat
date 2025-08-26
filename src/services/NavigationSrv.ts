@@ -1,6 +1,6 @@
 import { Location, NavigateFunction, Params } from "react-router-dom";
 
-export class NavStore {
+export class NavigationSrv {
 
   private nav!: NavigateFunction;
   private params: Params<string> = {}
