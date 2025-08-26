@@ -7,7 +7,7 @@ import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
 import { NavigationSrv } from "@/services/NavigationSrv";
-import { ChatHub, WebSocketInferenceString } from "@/hubs/ChatHub";
+import { ChatHub, WebSocketChatMessage, WebSocketInferenceString } from "@/hubs/ChatHub";
 import { IStreamResult } from "@microsoft/signalr";
 
 export class ChatStore {
@@ -96,7 +96,7 @@ export class ChatStore {
     }
     addMessageToConversation(message: string) {
         const newMessage = this.createUserMessage(message,this.activeConvId!);
-        this.allMessages.push(newMessage);
+        runInAction(() => this.allMessages.push(newMessage));
         this.updateChatStore();
         this.askPrompt(message,this.activeConvId!);
         this.nav.navigate(`/chat/${this.activeConvId}`);
@@ -108,7 +108,7 @@ export class ChatStore {
         const messages = [...newConv.messages??[]];
         newConv.messages = undefined;
         this.conversations.push(newConv);
-        this.allMessages = this.allMessages.concat(messages);
+        runInAction(() => this.allMessages = this.allMessages.concat(messages));
         // this.convMessages = messages;
         
         // this.lastMessage = messages![messages!.length - 1];
@@ -156,13 +156,12 @@ export class ChatStore {
     }
 
     private askPrompt(message: string, conversationId: string) {
-        this.chatHub.initialize(conversationId, []);
+        this.chatHub.initialize(conversationId, this.convertToWebSocketChatMessage(this.messages));
         this.chatHub.addMessage(message);
         this.stream = this.chatHub.sendInferenceRequestAsync();
 
         this.stream.subscribe({
             next: (result) => {
-                console.log("Received: ",result.inferenceString);
                 if (!this.lastMessage) return;
 
                 runInAction(() => {
@@ -190,6 +189,33 @@ export class ChatStore {
             }
         });
         
+    }
+
+    convertToWebSocketChatMessage(messages: Message[]):WebSocketChatMessage[] {
+        const webSocketChatMessages: WebSocketChatMessage[] = [];
+        for (const message of messages) {
+            if(message.role === "user"){
+                const userMessage: WebSocketChatMessage = {
+                    id: message.id,
+                    prompt: message.content??'',
+                    isComplete: true,
+                    response: '',
+                    success: message.isSuccess,
+                }
+                webSocketChatMessages.push(userMessage);
+            }
+            if(message.role === "agent"){
+                const agentMessage: WebSocketChatMessage = {
+                    id: message.id,
+                    response: message.content??'',
+                    isComplete: true,
+                    prompt: '',
+                    success: message.isSuccess,
+                }
+                webSocketChatMessages.push(agentMessage);
+            }
+        }
+        return webSocketChatMessages;
     }
 
     updateChatStore() {
