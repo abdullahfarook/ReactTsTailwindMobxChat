@@ -2,7 +2,7 @@ import { ApiService } from "@/core/api";
 import { toHumanReadable } from "@/core/utils";
 import { TConversation } from "@/models/conversation";
 import { Message } from "@/models/message";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeObservable, observable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
@@ -10,16 +10,20 @@ import { NavStore } from "@/stores/NavStore";
 import { ChatHub } from "@/hubs/ChatHub";
 
 export class ChatStore {
+    // injects
     apiService = inject(this, ApiService);
     session = inject(this, SessionStore);
     nav = inject(this, NavStore);
     chatHub = new ChatHub(`${this.apiService.baseUrl}/Hubs/ChatServicesHub`,async ()=> this.session.tokens.accessToken);
 
-    convsLoading = true;
-    chatLoading = false;
-    activeConvId?: string;
-    conversations: TConversation[] = [];
-    messages: Message[] = [];
+    // observables
+    @observable convsLoading = true;
+    @observable chatLoading = false;
+    @observable.shallow conversations: TConversation[] = [];
+    @observable messages: Message[] = [];
+
+    // properties
+    @observable activeConvId?: string;
     allMessages: Message[] = [];
     lastMessage: Message | undefined;
 
@@ -39,7 +43,7 @@ export class ChatStore {
     }
 
     constructor() {
-        makeAutoObservable(this);
+        makeObservable(this);
         this.chatHub.startAsync();
     }
 
@@ -56,11 +60,13 @@ export class ChatStore {
 
     async loadChat(conversationId: string) {
         if (conversationId === 'new') {
-            this.activeConvId = undefined
+            runInAction(() =>  this.activeConvId = undefined);
             return;
         }
-        this.activeConvId = conversationId;
-        this.chatLoading = true;
+        runInAction(() => {
+            this.chatLoading = true;
+            this.activeConvId = conversationId;
+        });
         await new Promise(resolve => setTimeout(resolve, 500));
         runInAction(() => {
             this.messages = this.allMessages.filter(m => m.conversationId === conversationId);
@@ -70,52 +76,103 @@ export class ChatStore {
     }
     async submitChatMessage(message: string) {
         if (!this.activeConvId) {
-            this.createConversation(message);
+            this.createNewConversation(message);
+        }else{
+            this.addMessageToConversation(message);
         }
-
+    }
+    addMessageToConversation(message: string) {
+        
     }
 
-    createConversation(message: string) {
+    createNewConversation(message: string) {
+        const newConv: TConversation = this.createNewConv(message);
+        const messages = [...newConv.messages??[]];
+        newConv.messages = undefined;
+        this.conversations.push(newConv);
+        this.allMessages =this.allMessages.concat(messages);
+        this.lastMessage = messages![messages!.length - 1];
+        this.updateChatStore();
+        // this.ask(message);
+        this.nav.navigate(`/chat/${newConv.id}`);
+    }
+
+    private createNewConv(message: string):TConversation {
+        const newConvId = uuid();
+        const newMessageId = uuid();
         const newConv: TConversation = {
-            id: uuid(),
+            id: newConvId,
             // trim to 4 words
             title: message.split(' ').slice(0, 4).join(' '),
             updatedOn: new Date(),
-            messages: [],
-
-        }
-        this.conversations.push(newConv);
-
-        const userMessage: Message = {
-            id: uuid(),
-            conversationId: newConv.id,
-            sender: this.session.firstName,
-            role: "user",
-            content: message,
-            isComplete: false,
-            isSuccess: true,
-            responseType: "markdown",
-            updatedOn: new Date()
-        }
-        const agentMessage: Message = {
-            id: uuid(),
-            parentId: userMessage.id,
-            sender: "GPT-4o",
-            role: "agent",
-           
-            isComplete: false,
-            isSuccess: true,
-            updatedOn: new Date()
-        }
-        userMessage.response = agentMessage;
-        this.allMessages.push(userMessage);
-
-        this.lastMessage = agentMessage;
-        this.allMessages.push(agentMessage);
-
-        this.updateChatStore();
-        this.nav.navigate(`/chat/${newConv.id}`);
+            messages: [{
+                id: newMessageId,
+                conversationId: newConvId,
+                sender: this.session.firstName,
+                role: "user",
+                content: message,
+                isComplete: false,
+                isSuccess: true,
+                responseType: "markdown",
+                updatedOn: new Date(),
+                response: {
+                    id: uuid(),
+                    parentId: newMessageId,
+                    conversationId: newConvId,
+                    sender: "GPT-4o",
+                    role: "agent",
+                    isComplete: false,
+                    isSuccess: true,
+                    responseType: "markdown",
+                    updatedOn: new Date()
+                }
+            }],
+        };
+        return newConv;
     }
+
+    // private ask(message: string) {
+    //     try {
+    //         this.chatHub.initialize(newConv.id, []);
+    //         this.chatHub.addMessage(message);
+    //         const stream = this.chatHub.sendInferenceRequestAsync();
+    //         stream.subscribe({
+    //             next: (data) => {
+    //                 runInAction(() => {
+    //                     const chunk = data?.inferenceString ?? "";
+    //                     this.lastMessage = agentMessage;
+    //                     agentMessage.content = (agentMessage.content ?? "") + chunk;
+    //                     agentMessage.updatedOn = new Date();
+    //                     this.updateMessages();
+    //                 });
+    //             },
+    //             complete: () => {
+    //                 runInAction(() => {
+    //                     agentMessage.isComplete = true;
+    //                     agentMessage.isSuccess = true;
+    //                     agentMessage.updatedOn = new Date();
+    //                     newConv.updatedOn = new Date();
+    //                     this.updateChatStore();
+    //                 });
+    //             },
+    //             error: () => {
+    //                 runInAction(() => {
+    //                     agentMessage.isComplete = true;
+    //                     agentMessage.isSuccess = false;
+    //                     agentMessage.updatedOn = new Date();
+    //                     this.updateChatStore();
+    //                 });
+    //             }
+    //         });
+    //     } catch {
+    //         runInAction(() => {
+    //             agentMessage.isComplete = true;
+    //             agentMessage.isSuccess = false;
+    //             agentMessage.updatedOn = new Date();
+    //             this.updateChatStore();
+    //         });
+    //     }
+    // }
 
     updateChatStore() {
         this.updateConversations();

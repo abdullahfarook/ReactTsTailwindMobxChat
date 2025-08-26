@@ -2,23 +2,23 @@ import { Location, NavigateFunction, Params } from "react-router-dom";
 
 export class NavStore {
 
-  _nav!: NavigateFunction;
-  _params: Params<string> = {}
-  _location!: Location<any>;
+  private nav!: NavigateFunction;
+  private params: Params<string> = {}
+  private location!: Location<any>;
   setNavigator(nav: NavigateFunction) {
-    this._nav = nav;
+    this.nav = nav;
   }
   setParams(params: any) {
-    this._params = params;
+    this.params = params;
   }
   setLocation(location: Location<any>) {
-    this._location = location;
+    this.location = location;
   }
   navigate(to: string, options?: any) {
-    this._nav(to, options);
+    this.nav(to, options);
   }
   goBack(i = -1) {
-    this._nav(i);
+    this.nav(i);
   }
 }
 
