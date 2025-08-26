@@ -1,11 +1,20 @@
+import { WebSocketChatExample } from '@/services/WebSocketChatExample';
 import { SessionStore } from '@/stores/Session';
 import { observer } from 'mobx-react';
+import { useEffect } from 'react';
 import { useInstance } from 'react-ioc';
 import { Navigate, Outlet} from 'react-router-dom';
 
 const MainLayout = () => {
     const session = useInstance(SessionStore);
-
+    useEffect(() => {
+        const startChat = async () => {
+            const chat = new WebSocketChatExample();
+            await chat.startChat();
+            await chat.sendMessage("Hello");
+        };
+        startChat();
+      }, []);
     if (session.isAuthenticated) {
         return (
             <div id="root"  >
