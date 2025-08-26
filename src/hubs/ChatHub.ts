@@ -1,6 +1,4 @@
-import { Observable, Observer } from '@/core/utils';
-import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import camelcaseKeys from 'camelcase-keys';
+import { HttpTransportType, HubConnection, HubConnectionBuilder, IStreamResult, LogLevel } from '@microsoft/signalr';
 import { v4 as uuid } from 'uuid';
 export class ChatHub {
   conversationId: string = uuid();
@@ -92,7 +90,7 @@ export class ChatHub {
     }
   }
 
-  public sendInferenceRequestAsync(): Observable<WebSocketInferenceString> {
+  public sendInferenceRequestAsync(): IStreamResult<WebSocketInferenceString> {
     if (!this.hubConnection || !this.isConnected) {
       throw new Error('Hub connection is not established');
     }
@@ -110,50 +108,6 @@ export class ChatHub {
         // delay 2 seconds
       console.log('ChatHubClient','Sending inference request', inferenceRequest);
       const stream = this.hubConnection.stream('InferenceRequest', inferenceRequest);
-        // Create Observable from SignalR stream
-      const observable = new Observable<WebSocketInferenceString>((observer) => {
-          
-          const subscription = stream.subscribe({
-          next: (data) => observer.next(camelcaseKeys(data??{}, {deep: true})),
-          error: (err) => observer.error(err),
-          complete: () => observer.complete()
-          });
-    
-            // Return cleanup function
-            return () => subscription.dispose();
-        });
-
-    //   stream.subscribe({
-    //     next: (response:any) => {
-    //       response = camelcaseKeys(response??{}, {deep: true});
-    //       console.log('ChatHub','Streaming response', response);
-  
-    //       if (isFirstResponse) {
-    //         isFirstResponse = false;
-    //         this.notifyInferenceStatus({
-    //           messageId: lastPrompt.id,
-    //           isComplete: false,
-    //           success: true
-    //         });
-    //       }
-  
-    //       // pass chunk to callback
-          
-    //       this.notifyInferenceString?.(response);
-    //     },
-    //     complete: () => {
-    //       console.log('ChatHubClient','Streaming complete');
-    //       this.notifyInferenceStatus({
-    //         messageId: lastPrompt.id,
-    //         isComplete: true,
-    //         success: true
-    //       });
-    //     },
-    //     error: (err:any) => {
-    //       console.error('WebSocketChat','Streaming error', err);
-    //       this.completeResponse(lastPrompt, false);
-    //     }
-    //   });
 
       const statusUpdate: WebSocketInferenceStatusUpdate = {
         messageId: inferenceRequest.chatMessages[inferenceRequest.chatMessages.length - 1]?.id || '',
@@ -162,7 +116,7 @@ export class ChatHub {
       };
 
       this.notifyInferenceStatus(statusUpdate);
-      return observable;
+      return stream;
     } catch (error) {
       console.error('WebSocketChat: Error in inference request stream', error);
       this.completeResponse(lastPrompt, false);

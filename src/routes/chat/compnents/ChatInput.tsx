@@ -7,12 +7,34 @@ const ChatInput = () => {
     const [value, setValue] = useState("");
     const chat = useInstance(ChatStore);
     function handleKeyDown(e:any): void {
-        
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
-            chat.submitChatMessage(value);
-            setValue('');
+            submitMessage();
         }
+    }
+    function submitMessage() {
+        console.log('submitMessage', value);
+        chat.submitChatMessage(value);
+        setValue('');
+        // scroll to last message
+        scrollToBottomChat('msg-content');
+    }
+    function getLastElementByClass(className:string) {
+        const elements = document.getElementsByClassName(className);
+        if (elements.length === 0) {
+            return null;
+        }
+        return elements[elements.length - 1];
+    }
+    function scrollToBottomChat(className:string) {
+        if (className == null) {
+            return;
+        }
+        var element = getLastElementByClass(className);
+        if (element == null) {
+            return;
+        }
+        element.scrollIntoView({ behavior: 'smooth' });
     }
 
     return <div className="w-full">
@@ -28,7 +50,7 @@ const ChatInput = () => {
                         <div className="items-between flex gap-2 pb-2 flex-row">
                             <div className="mx-auto flex"></div>
                             <div className="mr-2">
-                                <button onClick={()=> chat.submitChatMessage(value)} disabled={chat.chatLoading || !value || value == ''}  aria-label="Send message" id="send-button" className="cursor-pointer rounded-full bg-text-primary p-1.5 text-text-primary outline-offset-4 transition-all duration-200 disabled:cursor-not-allowed disabled:text-text-secondary disabled:opacity-10"
+                                <button onClick={submitMessage} disabled={chat.chatLoading || !value || value == ''}  aria-label="Send message" id="send-button" className="cursor-pointer rounded-full bg-text-primary p-1.5 text-text-primary outline-offset-4 transition-all duration-200 disabled:cursor-not-allowed disabled:text-text-secondary disabled:opacity-10"
                                     data-testid="send-button" type="submit" aria-describedby=":ra:"><span className="" data-state="closed"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white dark:text-black"><path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg></span></button>
                             </div>
                         </div>
@@ -37,5 +59,7 @@ const ChatInput = () => {
             </div>
         </form>
     </div>
+
+
 }
 export default ChatInput

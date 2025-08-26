@@ -58,12 +58,12 @@ export const ChatMessage = (props: Props) => {
                             <div className="flex max-w-full flex-grow flex-col gap-0">
                                 <div className="text-message flex min-h-[20px] flex-col items-start gap-3 overflow-visible [.text-message+&amp;]:mt-5" dir="auto">
                                     <div className="markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-100">
-                                        <div className="markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-20">
+                                        <div className="markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-20 ">
                                         <Markdown isStreaming={!message.isComplete}>{message.response?.content}</Markdown>
                                     </div>
                                     </div>
                                 </div>
-                            </div><span></span></div>
+                            </div><span className="msg-content"></span></div>
                     </div>
                 </div>
             </div>
