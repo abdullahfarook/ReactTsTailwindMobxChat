@@ -4,7 +4,7 @@ import { useInstance } from "react-ioc";
 import { observer } from "mobx-react";
 /* @ts-ignore */
 import ChatInput from "./compnents/ChatInput";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Spinner from "@/components/Spinner";
 import { Message } from "@/models/message";
@@ -72,8 +72,11 @@ const LoadingSpinner = (
         {/* <span className="animate-pulse text-text-primary ml-1">Loading...</span> */}
     </div>
 );
-const Messages = (props: { data: Message[] }) => (
-    <div className="relative flex-1 overflow-hidden overflow-y-auto">
-        {props.data?.map((message) => <ChatMessage key={message.id} data={message} />)}
-    </div>
-)
+const Messages = memo((props: { data: Message[] }) => {
+    console.log("Messages: ",props.data);
+    return (
+        <div className="relative flex-1 overflow-hidden overflow-y-auto">
+            {props.data?.map((message) => <ChatMessage key={message.id} data={message} />)}
+        </div>
+    )
+})

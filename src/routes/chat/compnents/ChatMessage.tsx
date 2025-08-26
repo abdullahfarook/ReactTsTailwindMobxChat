@@ -1,7 +1,7 @@
 import Markdown from "@/components/Markdown";
 import { Message } from "@/models/message";
 import { OpenAIMinimalIcon, UserIcon } from "@/components/svgs";
-import ReactMarkdown from "react-markdown";
+import { observer } from "mobx-react";
 
 
 
@@ -9,7 +9,7 @@ type Props = {
     data: Message;
 }
 
-export const ChatMessage = (props: Props) => {
+export const ChatMessage = observer((props: Props) => {
     const message = props.data;
     const response = message.response;
     
@@ -70,36 +70,4 @@ export const ChatMessage = (props: Props) => {
             </div>
         </div>
     </>
-}
-
-
-
-export const MessageItem = (message: Message) => {
-    const isAgent = message.role === "agent";
-
-    return (
-        <div className="w-full border-0 bg-transparent">
-            <div className="m-auto p-4 py-2 flex gap-3 md:gap-6 max-w-3xl">
-                {/* Avatar */}
-                <div className="flex-shrink-0">
-                    <div
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-white"
-                        style={{
-                            background: isAgent ? "rgb(171,104,255)" : "rgb(59,130,246)"
-                        }}
-                    >
-                        {message.sender[0]}
-                    </div>
-                </div>
-
-                {/* Message body */}
-                <div className="flex-1 flex flex-col">
-                    <h2 className="font-semibold text-base">{message.sender}</h2>
-                    <div className="prose dark:prose-invert max-w-full break-words">
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
+})

@@ -43,7 +43,7 @@ function SidePanel() {
                                         <div style={{ "overflow": "visible", "height": "0px", "width": "0px" }}>
                                             <div aria-label="Conversations" aria-readonly="true" className="ReactVirtualized__Grid ReactVirtualized__List outline-none" role="list" tabIndex={1} style={{
                                                 "boxSizing": "border-box", "direction":
-                                                    "ltr", "height": "828px", "position": "relative", "width": "236px", "willChange": "transform", "overflow": "hidden", "outline": "none"
+                                                    "ltr", "height": "828px", "position": "relative", "width": "236px", "willChange": "transform", "overflow": "auto", "outline": "none"
                                             }}>
                                                 <div className="ReactVirtualized__Grid__innerScrollContainer" role="row" style={{
                                                     "width": "auto", "height": "208px", "maxWidth": "236px", "maxHeight": "208px", "position":
