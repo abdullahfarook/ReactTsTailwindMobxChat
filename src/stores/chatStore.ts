@@ -7,11 +7,13 @@ import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
 import { NavStore } from "@/stores/NavStore";
+import { ChatHub } from "@/hubs/ChatHub";
 
 export class ChatStore {
     apiService = inject(this, ApiService);
     session = inject(this, SessionStore);
     nav = inject(this, NavStore);
+    chatHub = new ChatHub(`${this.apiService.baseUrl}/Hubs/ChatServicesHub`,async ()=> this.session.tokens.accessToken);
 
     convsLoading = true;
     chatLoading = false;
@@ -38,6 +40,7 @@ export class ChatStore {
 
     constructor() {
         makeAutoObservable(this);
+        this.chatHub.startAsync();
     }
 
     async loadConversations() {
