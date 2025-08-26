@@ -353,6 +353,7 @@ export interface WebSocketChatMessage {
 }
 
 export interface WebSocketInferenceString {
+  webSocketChatMessageId: string;
   inferenceString: string;
 }
 

@@ -11,6 +11,7 @@ type Props = {
 
 export const ChatMessage = (props: Props) => {
     const message = props.data;
+    const response = message.response;
     
     return <>
         <div className="text-token-text-primary w-full border-0 bg-transparent dark:border-0 dark:bg-transparent">
@@ -59,7 +60,7 @@ export const ChatMessage = (props: Props) => {
                                 <div className="text-message flex min-h-[20px] flex-col items-start gap-3 overflow-visible [.text-message+&amp;]:mt-5" dir="auto">
                                     <div className="markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-100">
                                         <div className="markdown prose message-content dark:prose-invert light w-full break-words dark:text-gray-20 ">
-                                        <Markdown isStreaming={!message.isComplete}>{message.response?.content}</Markdown>
+                                        <Markdown isStreaming={!(response?.isComplete??false)}>{response?.content}</Markdown>
                                     </div>
                                     </div>
                                 </div>

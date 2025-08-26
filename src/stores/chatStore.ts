@@ -2,12 +2,13 @@ import { ApiService } from "@/core/api";
 import { toHumanReadable } from "@/core/utils";
 import { TConversation } from "@/models/conversation";
 import { Message } from "@/models/message";
-import { makeObservable, observable, runInAction } from "mobx";
+import { computed, makeObservable, observable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
 import { NavStore } from "@/stores/NavStore";
-import { ChatHub } from "@/hubs/ChatHub";
+import { ChatHub, WebSocketInferenceString } from "@/hubs/ChatHub";
+import { IStreamResult } from "@microsoft/signalr";
 
 export class ChatStore {
     // injects
@@ -20,12 +21,24 @@ export class ChatStore {
     @observable convsLoading = true;
     @observable chatLoading = false;
     @observable.shallow conversations: TConversation[] = [];
-    @observable messages: Message[] = [];
+    @observable private _allMessages: Message[] = [];
+    @observable activeConvId?: string;
 
     // properties
-    @observable activeConvId?: string;
-    allMessages: Message[] = [];
-    lastMessage: Message | undefined;
+    stream: IStreamResult<WebSocketInferenceString> | undefined;
+
+    // computed
+    @computed
+    get lastMessage(): Message | undefined {
+        return this.messages[this.messages.length - 1];
+    }
+
+    @computed
+    get messages(): Message[] {
+        return this._allMessages.filter(m => m.conversationId === this.activeConvId)??[];
+    }
+
+
 
     get convsByDate(): [string, TConversation[]][] {
         // sort descending
@@ -52,7 +65,7 @@ export class ChatStore {
 
         runInAction(() => {
             this.conversations = localStorage.getItem('conversations') ? JSON.parse(localStorage.getItem('conversations')!) : [];
-            this.allMessages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
+            this._allMessages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
             this.convsLoading = false;
         })
 
@@ -69,7 +82,7 @@ export class ChatStore {
         });
         await new Promise(resolve => setTimeout(resolve, 500));
         runInAction(() => {
-            this.messages = this.allMessages.filter(m => m.conversationId === conversationId);
+            // this.convMessages = this.allMessages.filter(m => m.conversationId === conversationId);
             this.chatLoading = false;
         })
 
@@ -90,10 +103,12 @@ export class ChatStore {
         const messages = [...newConv.messages??[]];
         newConv.messages = undefined;
         this.conversations.push(newConv);
-        this.allMessages =this.allMessages.concat(messages);
-        this.lastMessage = messages![messages!.length - 1];
+        this._allMessages = this._allMessages.concat(messages);
+        // this.convMessages = messages;
+        
+        // this.lastMessage = messages![messages!.length - 1];
         this.updateChatStore();
-        // this.ask(message);
+        this.askPrompt(message,newConv.id);
         this.nav.navigate(`/chat/${newConv.id}`);
     }
 
@@ -111,7 +126,7 @@ export class ChatStore {
                 sender: this.session.firstName,
                 role: "user",
                 content: message,
-                isComplete: false,
+                isComplete: true,
                 isSuccess: true,
                 responseType: "markdown",
                 updatedOn: new Date(),
@@ -131,48 +146,42 @@ export class ChatStore {
         return newConv;
     }
 
-    // private ask(message: string) {
-    //     try {
-    //         this.chatHub.initialize(newConv.id, []);
-    //         this.chatHub.addMessage(message);
-    //         const stream = this.chatHub.sendInferenceRequestAsync();
-    //         stream.subscribe({
-    //             next: (data) => {
-    //                 runInAction(() => {
-    //                     const chunk = data?.inferenceString ?? "";
-    //                     this.lastMessage = agentMessage;
-    //                     agentMessage.content = (agentMessage.content ?? "") + chunk;
-    //                     agentMessage.updatedOn = new Date();
-    //                     this.updateMessages();
-    //                 });
-    //             },
-    //             complete: () => {
-    //                 runInAction(() => {
-    //                     agentMessage.isComplete = true;
-    //                     agentMessage.isSuccess = true;
-    //                     agentMessage.updatedOn = new Date();
-    //                     newConv.updatedOn = new Date();
-    //                     this.updateChatStore();
-    //                 });
-    //             },
-    //             error: () => {
-    //                 runInAction(() => {
-    //                     agentMessage.isComplete = true;
-    //                     agentMessage.isSuccess = false;
-    //                     agentMessage.updatedOn = new Date();
-    //                     this.updateChatStore();
-    //                 });
-    //             }
-    //         });
-    //     } catch {
-    //         runInAction(() => {
-    //             agentMessage.isComplete = true;
-    //             agentMessage.isSuccess = false;
-    //             agentMessage.updatedOn = new Date();
-    //             this.updateChatStore();
-    //         });
-    //     }
-    // }
+    private askPrompt(message: string, id: string) {
+        this.chatHub.initialize(id, []);
+        this.chatHub.addMessage(message);
+        this.stream = this.chatHub.sendInferenceRequestAsync();
+
+        this.stream.subscribe({
+            next: (result) => {
+                console.log("Received: ",result.inferenceString);
+                if (!this.lastMessage) return;
+
+                runInAction(() => {
+                    this.lastMessage!.response = {
+                        ...this.lastMessage!.response,
+                        content: (this.lastMessage!.response?.content ?? '') + result.inferenceString,
+                    } as Message;
+
+                    this.updateMessages();
+
+                });
+            },
+            complete: () => {
+                if(!this.lastMessage) return;
+                runInAction(() => {
+                    this.lastMessage!.response = {
+                        ...this.lastMessage!.response,
+                        isComplete: true,
+                    } as Message;
+                });
+                this.updateMessages();
+            },
+            error: (error) => {
+                console.error(error);
+            }
+        });
+        
+    }
 
     updateChatStore() {
         this.updateConversations();
@@ -186,6 +195,6 @@ export class ChatStore {
 
     updateMessages() {
         // in local storage
-        localStorage.setItem('messages', JSON.stringify(this.allMessages));
+        localStorage.setItem('messages', JSON.stringify(this._allMessages));
     }
 }
