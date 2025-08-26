@@ -73,7 +73,6 @@ const LoadingSpinner = (
     </div>
 );
 const Messages = memo((props: { data: Message[] }) => {
-    console.log("Messages: ",props.data);
     return (
         <div className="relative flex-1 overflow-hidden overflow-y-auto">
             {props.data?.map((message) => <ChatMessage key={message.id} data={message} />)}

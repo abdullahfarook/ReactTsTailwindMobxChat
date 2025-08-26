@@ -98,7 +98,7 @@ export class ChatStore {
         const newMessage = this.createUserMessage(message,this.activeConvId!);
         runInAction(() => this.allMessages.push(newMessage));
         this.updateChatStore();
-        this.askPrompt(message,this.activeConvId!);
+        this.askPrompt(message,this.activeConvId!,this.messages);
         this.nav.navigate(`/chat/${this.activeConvId}`);
     }
 
@@ -113,7 +113,7 @@ export class ChatStore {
         
         // this.lastMessage = messages![messages!.length - 1];
         this.updateChatStore();
-        this.askPrompt(message,newConv.id);
+        this.askPrompt(message,newConv.id,[]);
         this.nav.navigate(`/chat/${newConv.id}`);
     }
 
@@ -144,7 +144,7 @@ export class ChatStore {
                 id: uuid(),
                 parentId: newMessageId,
                 conversationId: conversationId,
-                sender: "GPT-4o",
+                sender: "Catalyst GPT",
                 role: "agent",
                 isComplete: false,
                 isSuccess: true,
@@ -155,8 +155,8 @@ export class ChatStore {
         return newMessage;
     }
 
-    private askPrompt(message: string, conversationId: string) {
-        this.chatHub.initialize(conversationId, this.convertToWebSocketChatMessage(this.messages));
+    private askPrompt(message: string, conversationId: string,messages: Message[]) {
+        this.chatHub.initialize(conversationId, this.convertToWebSocketChatMessage(messages));
         this.chatHub.addMessage(message);
         this.stream = this.chatHub.sendInferenceRequestAsync();
 
