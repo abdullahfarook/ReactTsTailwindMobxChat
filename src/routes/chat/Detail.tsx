@@ -72,8 +72,22 @@ const LoadingSpinner = (
         {/* <span className="animate-pulse text-text-primary ml-1">Loading...</span> */}
     </div>
 );
-const Messages = (props: { data: Message[] }) => (
-    <div className="relative flex-1 overflow-hidden overflow-y-auto">
-        {props.data?.map((message) => <ChatMessage key={message.id} data={message} />)}
-    </div>
-)
+const Messages = (props: { data: Message[] }) => {
+    // Create a flat list of messages including both user messages and their responses
+    const allMessages: Message[] = [];
+    
+    props.data?.forEach((userMessage) => {
+        // Add the user message
+        allMessages.push(userMessage);
+        // Add the response if it exists
+        if (userMessage.response) {
+            allMessages.push(userMessage.response);
+        }
+    });
+    
+    return (
+        <div className="relative flex-1 overflow-hidden overflow-y-auto">
+            {allMessages.map((message) => <ChatMessage key={message.id} data={message} />)}
+        </div>
+    );
+};

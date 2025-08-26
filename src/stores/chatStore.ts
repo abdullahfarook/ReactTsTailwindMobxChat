@@ -89,10 +89,16 @@ export class ChatStore {
         // Handle inference string updates (streaming)
         this.chatService.setInferenceStringCallback((data: WebSocketInferenceString) => {
             runInAction(() => {
-                const lastMessage = this.webSocketChatMessages[this.webSocketChatMessages.length - 1];
-                if (lastMessage && !lastMessage.isComplete) {
-                    // Update the last message with streaming content
-                    this.updateLastMessageContent(data.inferenceString);
+                // Find the agent message that's currently being streamed
+                const agentMessage = this.allMessages.find(m => 
+                    m.role === 'agent' && 
+                    m.conversationId === this.activeConvId && 
+                    !m.isComplete
+                );
+                
+                if (agentMessage && data.inferenceString) {
+                    // Update the agent message with streaming content
+                    agentMessage.content = (agentMessage.content || '') + data.inferenceString;
                 }
             });
         });
@@ -100,13 +106,18 @@ export class ChatStore {
         // Handle inference status updates
         this.chatService.setInferenceStatusCallback((data: WebSocketInferenceStatusUpdate) => {
             runInAction(() => {
-                const message = this.webSocketChatMessages.find(m => m.id === data.messageId);
-                if (message) {
-                    message.isComplete = data.isComplete;
-                    message.success = data.success;
+                // Find the agent message that corresponds to this status update
+                const agentMessage = this.allMessages.find(m => 
+                    m.role === 'agent' && 
+                    m.conversationId === this.activeConvId &&
+                    m.parentId // This links it to the user message
+                );
+                
+                if (agentMessage) {
+                    agentMessage.isComplete = data.isComplete;
+                    agentMessage.isSuccess = data.success;
                     
                     if (data.isComplete) {
-                        this.convertWebSocketMessageToAppMessage(message);
                         this.updateChatStore();
                     }
                 }
@@ -144,7 +155,9 @@ export class ChatStore {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         runInAction(() => {
-            this.messages = this.allMessages.filter(m => m.conversationId === conversationId);
+            // Filter to only user messages for display, but include their responses
+            const conversationMessages = this.allMessages.filter(m => m.conversationId === conversationId);
+            this.messages = conversationMessages.filter(m => m.role === 'user');
             this.chatLoading = false;
         });
 
@@ -209,9 +222,9 @@ export class ChatStore {
         userMessage.response = agentMessage;
         
         runInAction(() => {
-            this.allMessages.push(userMessage);
+            this.allMessages.push(userMessage, agentMessage);
             this.lastMessage = agentMessage;
-            this.allMessages.push(agentMessage);
+            // Only add user messages to the messages array for display
             this.messages = [userMessage];
         });
 
@@ -254,9 +267,9 @@ export class ChatStore {
         userMessage.response = agentMessage;
 
         runInAction(() => {
-            this.allMessages.push(userMessage);
+            this.allMessages.push(userMessage, agentMessage);
             this.lastMessage = agentMessage;
-            this.allMessages.push(agentMessage);
+            // Only add user messages to the messages array for display
             this.messages.push(userMessage);
         });
 
@@ -332,14 +345,7 @@ export class ChatStore {
         }
     }
 
-    private updateLastMessageContent(content: string) {
-        const lastMessage = this.lastMessage;
-        if (lastMessage && !lastMessage.isComplete) {
-            runInAction(() => {
-                lastMessage.content = (lastMessage.content || '') + content;
-            });
-        }
-    }
+
 
     private convertAppMessagesToWebSocketMessages(messages: Message[]): WebSocketChatMessage[] {
         return messages
@@ -356,18 +362,7 @@ export class ChatStore {
             }));
     }
 
-    private convertWebSocketMessageToAppMessage(webSocketMessage: WebSocketChatMessage) {
-        const userMessage = this.allMessages.find(m => m.id === webSocketMessage.id);
-        const response = userMessage?.response;
-        if (userMessage && response) {
-            runInAction(() => {
-                response.content = webSocketMessage.response || '';
-                response.isComplete = webSocketMessage.isComplete;
-                response.isSuccess = webSocketMessage.success;
-                response.responseType = webSocketMessage.responseType as any;
-            });
-        }
-    }
+
 
     // WebSocketChat integration methods
     updateUserInput(input: string) {
