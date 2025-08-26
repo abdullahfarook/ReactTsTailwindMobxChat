@@ -21,7 +21,7 @@ export class ChatStore {
     @observable convsLoading = true;
     @observable chatLoading = false;
     @observable.shallow conversations: TConversation[] = [];
-    @observable private _allMessages: Message[] = [];
+    @observable private allMessages: Message[] = [];
     @observable activeConvId?: string;
 
     // properties
@@ -35,7 +35,7 @@ export class ChatStore {
 
     @computed
     get messages(): Message[] {
-        return this._allMessages.filter(m => m.conversationId === this.activeConvId)??[];
+        return this.allMessages.filter(m => m.conversationId === this.activeConvId)??[];
     }
 
 
@@ -65,7 +65,7 @@ export class ChatStore {
 
         runInAction(() => {
             this.conversations = localStorage.getItem('conversations') ? JSON.parse(localStorage.getItem('conversations')!) : [];
-            this._allMessages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
+            this.allMessages = localStorage.getItem('messages') ? JSON.parse(localStorage.getItem('messages')!) : [];
             this.convsLoading = false;
         })
 
@@ -95,7 +95,11 @@ export class ChatStore {
         }
     }
     addMessageToConversation(message: string) {
-        
+        const newMessage = this.createUserMessage(message,this.activeConvId!);
+        this.allMessages.push(newMessage);
+        this.updateChatStore();
+        this.askPrompt(message,this.activeConvId!);
+        this.nav.navigate(`/chat/${this.activeConvId}`);
     }
 
     createNewConversation(message: string) {
@@ -104,7 +108,7 @@ export class ChatStore {
         const messages = [...newConv.messages??[]];
         newConv.messages = undefined;
         this.conversations.push(newConv);
-        this._allMessages = this._allMessages.concat(messages);
+        this.allMessages = this.allMessages.concat(messages);
         // this.convMessages = messages;
         
         // this.lastMessage = messages![messages!.length - 1];
@@ -115,40 +119,44 @@ export class ChatStore {
 
     private createNewConv(message: string):TConversation {
         const newConvId = uuid();
-        const newMessageId = uuid();
         const newConv: TConversation = {
             id: newConvId,
             // trim to 4 words
-            title: message.split(' ').slice(0, 4).join(' '),
+            title: message.split(' ').slice(0, 7).join(' '),
             updatedOn: new Date(),
-            messages: [{
-                id: newMessageId,
-                conversationId: newConvId,
-                sender: this.session.firstName,
-                role: "user",
-                content: message,
-                isComplete: true,
-                isSuccess: true,
-                responseType: "markdown",
-                updatedOn: new Date(),
-                response: {
-                    id: uuid(),
-                    parentId: newMessageId,
-                    conversationId: newConvId,
-                    sender: "GPT-4o",
-                    role: "agent",
-                    isComplete: false,
-                    isSuccess: true,
-                    responseType: "markdown",
-                    updatedOn: new Date()
-                }
-            }],
+            messages: [this.createUserMessage(message,newConvId)],
         };
         return newConv;
     }
+    private createUserMessage(message: string, conversationId: string) {
+        const newMessageId = uuid();
+        const newMessage: Message = {
+            id: newMessageId,
+            conversationId: conversationId,
+            sender: this.session.firstName,
+            role: "user",
+            content: message,
+            isComplete: true,
+            isSuccess: true,
+            responseType: "markdown",
+            updatedOn: new Date(),
+            response: {
+                id: uuid(),
+                parentId: newMessageId,
+                conversationId: conversationId,
+                sender: "GPT-4o",
+                role: "agent",
+                isComplete: false,
+                isSuccess: true,
+                responseType: "markdown",
+                updatedOn: new Date()
+            }
+        };
+        return newMessage;
+    }
 
-    private askPrompt(message: string, id: string) {
-        this.chatHub.initialize(id, []);
+    private askPrompt(message: string, conversationId: string) {
+        this.chatHub.initialize(conversationId, []);
         this.chatHub.addMessage(message);
         this.stream = this.chatHub.sendInferenceRequestAsync();
 
@@ -196,6 +204,6 @@ export class ChatStore {
 
     updateMessages() {
         // in local storage
-        localStorage.setItem('messages', JSON.stringify(this._allMessages));
+        localStorage.setItem('messages', JSON.stringify(this.allMessages));
     }
 }
