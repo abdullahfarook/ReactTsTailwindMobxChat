@@ -1,9 +1,9 @@
-import { WebSocketChat, WebSocketChatMessage } from './WebSocketChat';
+import { ChatHub } from '@/hubs/ChatHub';
 import React from 'react';
 
 // Example usage of the simplified WebSocketChat with callback approach
 export class WebSocketChatExample {
-    private chat: WebSocketChat;
+    private chat: ChatHub;
 
     constructor() {
         // Initialize WebSocketChat with connection URL and token provider
@@ -12,7 +12,7 @@ export class WebSocketChatExample {
             return localStorage.getItem('accessToken');
         };
 
-        this.chat = new WebSocketChat(connectionUrl, accessTokenProvider);
+        this.chat = new ChatHub(connectionUrl, accessTokenProvider);
         this.setupCallbacks();
     }
 
@@ -133,7 +133,7 @@ export function createWebSocketChat(
         return localStorage.getItem('accessToken');
     };
 
-    const chat = new WebSocketChat(connectionUrl, accessTokenProvider);
+    const chat = new ChatHub(connectionUrl, accessTokenProvider);
     
     // Set up callbacks if provided
     if (onInferenceString) {

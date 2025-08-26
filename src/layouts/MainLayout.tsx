@@ -1,4 +1,4 @@
-import { WebSocketChatExample } from '@/services/WebSocketChatExample';
+import { WebSocketChatExample } from '@/services/ChatHubExample';
 import { SessionStore } from '@/stores/Session';
 import { observer } from 'mobx-react';
 import { useEffect } from 'react';
@@ -11,9 +11,9 @@ const MainLayout = () => {
         const startChat = async () => {
             const chat = new WebSocketChatExample();
             await chat.startChat();
-            await chat.sendMessage("Hello");
+            await chat.sendMessage("Generate me long text");
         };
-        startChat();
+        // startChat();
       }, []);
     if (session.isAuthenticated) {
         return (

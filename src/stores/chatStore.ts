@@ -7,7 +7,7 @@ import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
 import { SessionStore } from "./Session";
 import { NavStore } from "@/stores/NavStore";
-import { WebSocketChat, WebSocketChatMessage, WebSocketInferenceString, WebSocketInferenceStatusUpdate } from "../services/WebSocketChat";
+import { ChatHub, WebSocketChatMessage, WebSocketInferenceStatusUpdate, WebSocketInferenceString } from "@/hubs/ChatHub";
 
 export class ChatStore {
     apiService = inject(this, ApiService);
@@ -24,7 +24,7 @@ export class ChatStore {
     lastMessage: Message | undefined;
 
     // WebSocketChat integration
-    private chatService?: WebSocketChat;
+    private chatService?: ChatHub;
     userInput: string = '';
     canSend: boolean = true;
     canStop: boolean = false;
@@ -68,16 +68,16 @@ export class ChatStore {
             nav: false
         });
         
-        this.initializeWebSocketChat();
+        this.initializeWebSocketChat();  
     }
 
     private initializeWebSocketChat() {
-        const connectionUrl = "https://localhost:5001/chathub"; // Adjust based on your backend
+        const connectionUrl = "https://localhost:5001/Hubs/ChatServicesHub"; // Adjust based on your backend
         const accessTokenProvider = async (): Promise<string | null> => {
             return localStorage.getItem('accessToken');
         };
 
-        this.chatService = new WebSocketChat(connectionUrl, accessTokenProvider);
+        this.chatService = new ChatHub(connectionUrl, accessTokenProvider);
         
         // Setup event handlers
         this.setupWebSocketChatHandlers();
@@ -282,8 +282,26 @@ export class ChatStore {
     }
 
     private async sendMessageViaChatService(message: string) {
-        if (!this.chatService || !this.isConnected) {
-            console.error('WebSocketChat not connected');
+        if (!this.chatService) {
+            console.error('WebSocketChat service not initialized');
+            return;
+        }
+
+        // Try to connect if not connected
+        if (!this.isConnected && !this.isConnecting) {
+            await this.startConnection();
+        }
+
+        // Wait a bit for connection to establish
+        let retryCount = 0;
+        while (!this.isConnected && retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            retryCount++;
+        }
+
+        if (!this.isConnected) {
+            console.error('WebSocketChat not connected after retries');
+            this.handleMessageError("Unable to connect to chat service.");
             return;
         }
 
@@ -299,15 +317,18 @@ export class ChatStore {
             await this.chatService.sendInferenceRequestAsync();
         } catch (error) {
             console.error('Failed to send message:', error);
-            // Handle error - mark message as failed
-            const lastMessage = this.lastMessage;
-            if (lastMessage) {
-                runInAction(() => {
-                    lastMessage.isComplete = true;
-                    lastMessage.isSuccess = false;
-                    lastMessage.content = "Sorry, there was an error processing your message.";
-                });
-            }
+            this.handleMessageError("Sorry, there was an error processing your message.");
+        }
+    }
+
+    private handleMessageError(errorMessage: string) {
+        const lastMessage = this.lastMessage;
+        if (lastMessage) {
+            runInAction(() => {
+                lastMessage.isComplete = true;
+                lastMessage.isSuccess = false;
+                lastMessage.content = errorMessage;
+            });
         }
     }
 

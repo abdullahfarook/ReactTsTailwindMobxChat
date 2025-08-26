@@ -1,63 +1,9 @@
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
-import { makeAutoObservable, runInAction } from 'mobx';
-
-// Simplified Types and Interfaces
-export interface WebSocketChatMessage {
-  id: string;
-  conversationId?: string;
-  prompt: string;
-  isComplete: boolean;
-  success: boolean;
-  responseType?: string;
-  response: string;
-}
-
-export interface WebSocketInferenceString {
-  inferenceString: string;
-}
-
-export interface WebSocketInferenceStatusUpdate {
-  messageId: string;
-  isComplete: boolean;
-  success: boolean;
-}
-
-export interface ChatMessage {
-  id: string;
-  message: string;
-  role: 'user' | 'assistant';
-}
-
-export interface InferenceSettings {
-  temperature?: number;
-  maxTokens?: number;
-  topP?: number;
-  frequencyPenalty?: number;
-  presencePenalty?: number;
-}
-
-export interface InferenceRequest {
-  id: string;
-  settings: InferenceSettings;
-  systemMessage: string;
-  chatMessages: ChatMessage[];
-}
-
-export interface LocalStorageSettings {
-  inferenceSettings: InferenceSettings;
-  systemMessage: string;
-  darkMode: boolean;
-  settingsVersion: number;
-}
-
-// Callback function types
-export type InferenceStringCallback = (data: WebSocketInferenceString) => void;
-export type InferenceStatusCallback = (data: WebSocketInferenceStatusUpdate) => void;
-export type StateChangeCallback = (isConnected: boolean) => void;
-
-export class WebSocketChat {
+import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import camelcaseKeys from 'camelcase-keys';
+import { v4 as uuid } from 'uuid';
+export class ChatHub {
   // Observable properties
-  conversationId: string = this.generateGuid();
+  conversationId: string = uuid();
   userInput: string = '';
   canSend: boolean = true;
   canStop: boolean = false;
@@ -96,15 +42,12 @@ export class WebSocketChat {
     this.connectionUrl = connectionUrl;
     this.accessTokenProvider = accessTokenProvider;
     
-    makeAutoObservable(this);
   }
 
   // Public methods
   public initialize(conversationId: string, messages: WebSocketChatMessage[]): void {
-    runInAction(() => {
-      this.conversationId = conversationId;
-      this.webSocketChatMessages = [...messages];
-    });
+    this.conversationId = conversationId;
+    this.webSocketChatMessages = [...messages];
   }
 
   public async startAsync(): Promise<void> {
@@ -112,27 +55,21 @@ export class WebSocketChat {
       return;
     }
 
-    runInAction(() => {
-      this.isConnecting = true;
-    });
+    this.isConnecting = true;
 
     try {
       await this.createHubConnection();
       await this.hubConnection!.start();
       
-      runInAction(() => {
-        this.isConnected = true;
-        this.isConnecting = false;
-      });
+      this.isConnected = true;
+      this.isConnecting = false;
 
       this.notifyStateChange(true);
       console.log('WebSocketChat: Connected to SignalR hub');
     } catch (error) {
       console.error('WebSocketChat: Failed to start connection', error);
-      runInAction(() => {
-        this.isConnected = false;
-        this.isConnecting = false;
-      });
+      this.isConnected = false;
+      this.isConnecting = false;
       this.notifyStateChange(false);
       throw error;
     }
@@ -145,10 +82,8 @@ export class WebSocketChat {
 
     try {
       await this.hubConnection.stop();
-      runInAction(() => {
-        this.isConnected = false;
-        this.isConnecting = false;
-      });
+      this.isConnected = false;
+      this.isConnecting = false;
       this.notifyStateChange(false);
       console.log('WebSocketChat: Disconnected from SignalR hub');
     } catch (error) {
@@ -172,32 +107,42 @@ export class WebSocketChat {
     let isFirstResponse = true;
 
     try {
-      const stream = this.hubConnection.stream<WebSocketInferenceString>('InferenceRequest', inferenceRequest);
-      
-      // Process stream using for-await loop
-      for await (const message of stream as any) {
-        if (isFirstResponse) {
-          const response = message.inferenceString;
-          if (response.length > 0) {
-            isFirstResponse = false;
-            const isSet = this.setResponseType(lastPrompt, response.charAt(0));
-            if (isSet) {
-              // Remove first character
-              const remainingResponse = response.substring(1);
-              this.addResponseString(lastPrompt, remainingResponse);
-            } else {
-              this.setResponseTypeBasedOnContent(lastPrompt, response);
-              this.addResponseString(lastPrompt, response);
-            }
-          }
-        } else {
-          this.addResponseString(lastPrompt, message.inferenceString);
-        }
-        
-        this.notifyInferenceString(message);
-      }
+        // delay 2 seconds
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      console.log('ChatHubClient','Sending inference request', inferenceRequest);
+      const stream = await this.hubConnection.stream('InferenceRequest', inferenceRequest);
 
-      this.completeResponse(lastPrompt, true);
+      stream.subscribe({
+        next: (response:any) => {
+          response = camelcaseKeys(response??{}, {deep: true});
+          console.log('ChatHub','Streaming response', response);
+  
+          if (isFirstResponse) {
+            isFirstResponse = false;
+            this.notifyInferenceStatus({
+              messageId: lastPrompt.id,
+              isComplete: false,
+              success: true
+            });
+          }
+  
+          // pass chunk to callback
+          
+          this.notifyInferenceString?.(response);
+        },
+        complete: () => {
+          console.log('ChatHubClient','Streaming complete');
+          this.notifyInferenceStatus({
+            messageId: lastPrompt.id,
+            isComplete: true,
+            success: true
+          });
+        },
+        error: (err:any) => {
+          console.error('WebSocketChat','Streaming error', err);
+          this.completeResponse(lastPrompt, false);
+        }
+      });
 
       const statusUpdate: WebSocketInferenceStatusUpdate = {
         messageId: inferenceRequest.chatMessages[inferenceRequest.chatMessages.length - 1]?.id || '',
@@ -215,7 +160,7 @@ export class WebSocketChat {
 
   public addMessage(prompt: string): WebSocketChatMessage {
     const message: WebSocketChatMessage = {
-      id: this.generateGuid(),
+      id: uuid(),
       prompt,
       conversationId: this.conversationId,
       isComplete: false,
@@ -224,36 +169,26 @@ export class WebSocketChat {
       responseType: undefined
     };
 
-    runInAction(() => {
-      this.webSocketChatMessages.push(message);
-    });
+    this.webSocketChatMessages.push(message);
 
     return message;
   }
 
   public clearMessages(): void {
-    runInAction(() => {
-      this.webSocketChatMessages = [];
-    });
+    this.webSocketChatMessages = [];
   }
 
   public updateUserInput(input: string): void {
-    runInAction(() => {
-      this.userInput = input;
-      this.canSend = input.trim().length > 0 && this.isConnected;
-    });
+    this.userInput = input;
+    this.canSend = input.trim().length > 0 && this.isConnected;
   }
 
   public setCanStop(canStop: boolean): void {
-    runInAction(() => {
-      this.canStop = canStop;
-    });
+    this.canStop = canStop;
   }
 
   public updateLocalStorageSettings(settings: Partial<LocalStorageSettings>): void {
-    runInAction(() => {
-      this.localStorageSettings = { ...this.localStorageSettings, ...settings };
-    });
+    this.localStorageSettings = { ...this.localStorageSettings, ...settings };
   }
 
   // Callback setters
@@ -277,7 +212,7 @@ export class WebSocketChat {
       .withUrl(this.connectionUrl, {
         accessTokenFactory: () => token || '',
         skipNegotiation: true,
-        transport: 1 // WebSockets only
+        transport: HttpTransportType.WebSockets
       })
       .configureLogging(LogLevel.Information)
       .build();
@@ -301,10 +236,8 @@ export class WebSocketChat {
 
     // Handle connection state changes
     this.hubConnection.onclose(() => {
-      runInAction(() => {
-        this.isConnected = false;
-        this.isConnecting = false;
-      });
+      this.isConnected = false;
+      this.isConnecting = false;
       this.notifyStateChange(false);
       console.log('WebSocketChat: Connection closed');
     });
@@ -328,7 +261,7 @@ export class WebSocketChat {
 
       if (promptAndResponse.isComplete && promptAndResponse.success) {
         const modelMessage: ChatMessage = {
-          id: this.generateGuid(),
+          id: uuid(),
           message: promptAndResponse.response || '',
           role: 'assistant'
         };
@@ -340,25 +273,21 @@ export class WebSocketChat {
   }
 
   private addResponseString(message: WebSocketChatMessage, responseString: string): void {
-    runInAction(() => {
-      const currentResponse = message.response;
-      const index = currentResponse.length < 2 ? 0 : currentResponse.length - 2;
-      
-      const head = currentResponse.substring(0, index);
-      const tail = currentResponse.substring(index);
-      
-      const combinedTail = tail + responseString;
-      const escapedTail = this.escapeSpecialCharacters(combinedTail, message.responseType);
-      
-      message.response = head + escapedTail;
-    });
+    const currentResponse = message.response;
+    const index = currentResponse.length < 2 ? 0 : currentResponse.length - 2;
+    
+    const head = currentResponse.substring(0, index);
+    const tail = currentResponse.substring(index);
+    
+    const combinedTail = tail + responseString;
+    const escapedTail = this.escapeSpecialCharacters(combinedTail, message.responseType);
+    
+    message.response = head + escapedTail;
   }
 
   private completeResponse(message: WebSocketChatMessage, success: boolean): void {
-    runInAction(() => {
-      message.isComplete = true;
-      message.success = success;
-    });
+    message.isComplete = true;
+    message.success = success;
   }
 
   private setResponseType(message: WebSocketChatMessage, firstChar: string): boolean {
@@ -381,10 +310,8 @@ export class WebSocketChat {
     }
 
     if (responseType) {
-      runInAction(() => {
-        message.responseType = responseType;
-        isSet = true;
-      });
+      message.responseType = responseType;
+      isSet = true;
     }
 
     return isSet;
@@ -446,14 +373,58 @@ export class WebSocketChat {
     }
   }
 
-  private generateGuid(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  }
 }
 
-// Export default instance for easy usage
-export default WebSocketChat;
+// Simplified Types and Interfaces
+export interface WebSocketChatMessage {
+  id: string;
+  conversationId?: string;
+  prompt: string;
+  isComplete: boolean;
+  success: boolean;
+  responseType?: string;
+  response: string;
+}
+
+export interface WebSocketInferenceString {
+  inferenceString: string;
+}
+
+export interface WebSocketInferenceStatusUpdate {
+  messageId: string;
+  isComplete: boolean;
+  success: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  message: string;
+  role: 'user' | 'assistant';
+}
+
+export interface InferenceSettings {
+  temperature?: number;
+  maxTokens?: number;
+  topP?: number;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+}
+
+export interface InferenceRequest {
+  id: string;
+  settings: InferenceSettings;
+  systemMessage: string;
+  chatMessages: ChatMessage[];
+}
+
+export interface LocalStorageSettings {
+  inferenceSettings: InferenceSettings;
+  systemMessage: string;
+  darkMode: boolean;
+  settingsVersion: number;
+}
+
+// Callback function types
+export type InferenceStringCallback = (data: WebSocketInferenceString) => void;
+export type InferenceStatusCallback = (data: WebSocketInferenceStatusUpdate) => void;
+export type StateChangeCallback = (isConnected: boolean) => void;
