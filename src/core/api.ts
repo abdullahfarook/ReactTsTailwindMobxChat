@@ -2,11 +2,12 @@ import { ApiErrorResponse, ApiResponseWrapper, ApiSuccessResponse } from "@/mode
 import camelcaseKeys from "camelcase-keys";
 
 export class ApiService {
-    baseUrl: string = "https://fd3147f39df6.ngrok-free.app";
-    // constructor(url: string) {
-    //     if (!url || url == '') throw new Error('BaseApi: url is required');
-    //     this.baseUrl = url;
-    // }
+    baseUrl: string = '';
+    constructor() {
+        const envUrl = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+        // Ensure no trailing slash; allow empty string to use relative '/api' (works with dev proxy)
+        this.baseUrl = (envUrl ?? 'https://localhost:5001').replace(/\/+$/, '');
+    }
     public get<T>(input: RequestInfo): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input);
     }
