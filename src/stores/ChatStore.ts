@@ -82,7 +82,6 @@ export class ChatStore {
         });
         await new Promise(resolve => setTimeout(resolve, 500));
         runInAction(() => {
-            // this.convMessages = this.allMessages.filter(m => m.conversationId === conversationId);
             this.chatLoading = false;
         })
 
@@ -97,6 +96,7 @@ export class ChatStore {
     }
     private updateConvDate() {
         const conversation = this.conversations.find(c => c.id === this.activeConvId);
+        if(!conversation) return;
         runInAction(() => conversation!.updatedOn = new Date());
         this.updateConversations();
     }
@@ -116,9 +116,6 @@ export class ChatStore {
         newConv.messages = undefined;
         this.conversations.push(newConv);
         runInAction(() => this.allMessages = this.allMessages.concat(messages));
-        // this.convMessages = messages;
-        
-        // this.lastMessage = messages![messages!.length - 1];
         this.updateChatStore();
         this.askPrompt(message,newConv.id,[]);
         this.nav.navigate(`/chat/${newConv.id}`);

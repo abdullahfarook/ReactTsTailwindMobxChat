@@ -39,29 +39,9 @@ function SidePanel() {
                             <div className="flex flex-1 flex-col">
                                 <PanelHeader />
                                 <div className="relative flex h-full flex-col pb-2 text-sm text-text-primary">
-                                    <div className="flex-1" style={{ "position": "relative" }}>
-                                        <div style={{ "overflow": "visible", "height": "0px", "width": "0px" }}>
-                                            <div aria-label="Conversations" aria-readonly="true" className="ReactVirtualized__Grid ReactVirtualized__List outline-none" role="list" tabIndex={1} style={{
-                                                "boxSizing": "border-box", "direction":
-                                                    "ltr", "height": "828px", "position": "relative", "width": "236px", "willChange": "transform", "overflow": "auto", "outline": "none"
-                                            }}>
-                                                <div className="ReactVirtualized__Grid__innerScrollContainer" role="row" style={{
-                                                    "width": "auto", "height": "208px", "maxWidth": "236px", "maxHeight": "208px", "position":
-                                                        "relative"
-                                                }}>
-                                                    {chat.convsLoading && LoadingSpinner}
-                                                    {!chat.convsLoading && <Conversations data={chat.convsByDate} activeId={chat.activeConvId} />}
-
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="resize-triggers">
-                                            <div className="expand-trigger">
-                                                <div style={{ "width": "237px", "height": "829px" }}></div>
-                                            </div>
-                                            <div className="contract-trigger"></div>
-                                        </div>
+                                    <div className="flex-1 relative overflow-y-auto" aria-label="Conversations" role="list" tabIndex={0}>
+                                        {chat.convsLoading && LoadingSpinner}
+                                        {!chat.convsLoading && <Conversations data={chat.convsByDate} activeId={chat.activeConvId} />}
                                     </div>
                                 </div>
                             </div>
