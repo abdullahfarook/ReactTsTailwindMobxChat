@@ -20,7 +20,7 @@ export class ChatStore {
     // observables
     @observable convsLoading = true;
     @observable chatLoading = false;
-    @observable.shallow conversations: TConversation[] = [];
+    @observable conversations: TConversation[] = [];
     @observable private allMessages: Message[] = [];
     @observable activeConvId?: string;
 
@@ -43,7 +43,7 @@ export class ChatStore {
     get convsByDate(): [string, TConversation[]][] {
         // sort descending
         const convs = this.conversations?.slice()?.sort((a, b) => new Date(b.updatedOn).getTime() - new Date(a.updatedOn).getTime());
-        const val = convs.slice()?.toSorted()?.reduce((acc, curr) => {
+        const val = convs.slice()?.sort()?.reduce((acc, curr) => {
             const key = toHumanReadable(curr.updatedOn);
             if (acc.has(key)) {
                 acc.get(key)?.push(curr);
@@ -93,7 +93,14 @@ export class ChatStore {
         }else{
             this.addMessageToConversation(message);
         }
+        this.updateConvDate();
     }
+    private updateConvDate() {
+        const conversation = this.conversations.find(c => c.id === this.activeConvId);
+        runInAction(() => conversation!.updatedOn = new Date());
+        this.updateConversations();
+    }
+
     addMessageToConversation(message: string) {
         const newMessage = this.createUserMessage(message,this.activeConvId!);
         runInAction(() => this.allMessages.push(newMessage));

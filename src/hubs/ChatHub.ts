@@ -18,7 +18,7 @@ export class ChatHub {
       frequencyPenalty: 0.0,
       presencePenalty: 0.0
     },
-    systemMessage: 'You are a helpful assistant.',
+    systemMessage: 'You are a helpful assistant. You always respond details in professional, elegent and beautiful markdown format without any code blocks. or html code',
     darkMode: false,
     settingsVersion: 1
   };

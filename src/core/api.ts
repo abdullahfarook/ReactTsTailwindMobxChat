@@ -2,7 +2,7 @@ import { ApiErrorResponse, ApiResponseWrapper, ApiSuccessResponse } from "@/mode
 import camelcaseKeys from "camelcase-keys";
 
 export class ApiService {
-    baseUrl: string = "https://localhost:5001";
+    baseUrl: string = "https://fd3147f39df6.ngrok-free.app";
     // constructor(url: string) {
     //     if (!url || url == '') throw new Error('BaseApi: url is required');
     //     this.baseUrl = url;

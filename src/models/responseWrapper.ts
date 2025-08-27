@@ -1,3 +1,5 @@
+import { TResult } from "./result";
+
 export class ApiResponseWrapper<T> implements TResult<T> {
     isSuccessStatusCode: boolean;
     statusCode: number;
