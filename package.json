@@ -3,9 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "cross-env NODE_ENV=development vite",
     "build": "tsc && vite build",
-    "deploy": "npm run build && copy vercel.json dist/vercel.json && vercel --prod",
+    "deploy": "cross-env NODE_ENV=production npm run build && copy vercel.json dist/vercel.json && vercel --prod",
     "preview": "vite preview",
     "lint": "eslint src --max-warnings=0",
     "types": "tsc --project tsconfig.json --noEmit"
@@ -48,6 +48,7 @@
     "@typescript-eslint/parser": "^5.55.0",
     "@vitejs/plugin-react-swc": "^3.2.0",
     "autoprefixer": "^10.4.14",
+    "cross-env": "^10.0.0",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.7.0",
     "eslint-plugin-prettier": "^4.2.1",

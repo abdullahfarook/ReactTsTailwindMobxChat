@@ -4,9 +4,9 @@ import camelcaseKeys from "camelcase-keys";
 export class ApiService {
     baseUrl: string = '';
     constructor() {
-        const envUrl = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+        const url = import.meta.env.VITE_API_BASE_URL;
         // Ensure no trailing slash; allow empty string to use relative '/api' (works with dev proxy)
-        this.baseUrl = (envUrl ?? 'https://localhost:5001').replace(/\/+$/, '');
+        this.baseUrl = (url ?? 'https://localhost:5001').replace(/\/+$/, '');
     }
     public get<T>(input: RequestInfo): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input);
