@@ -45,7 +45,9 @@ type TAnchorProps = {
 };
 
 export const a: React.ElementType = memo(({ href, children }: TAnchorProps) => {
-
+  if(href.includes('DownloadAttachmentRawData')){
+    return withAccessToken();
+  }
   return (
     <a href={href} >
       {children}
@@ -53,6 +55,18 @@ export const a: React.ElementType = memo(({ href, children }: TAnchorProps) => {
   );
 
 
+
+  function withAccessToken() {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      href = href + `?access_token=${accessToken}`;
+    }
+    return (
+      <a href={href}>
+        {children}
+      </a>
+    );
+  }
 });
 
 
