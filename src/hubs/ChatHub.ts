@@ -181,6 +181,7 @@ export class ChatHub {
         transport: HttpTransportType.WebSockets
       })
       .configureLogging(LogLevel.Information)
+      .withAutomaticReconnect()
       .build();
 
     this.setupHubConnection();
