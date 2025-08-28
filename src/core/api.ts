@@ -2,12 +2,12 @@ import { ApiErrorResponse, ApiResponseWrapper, ApiSuccessResponse } from "@/mode
 import camelcaseKeys from "camelcase-keys";
 
 export class ApiService {
-    baseUrl: string = '';
-    constructor() {
-        const url = import.meta.env.VITE_API_BASE_URL;
-        // Ensure no trailing slash; allow empty string to use relative '/api' (works with dev proxy)
-        this.baseUrl = (url ?? 'https://localhost:5001').replace(/\/+$/, '');
-    }
+    baseUrl: string = import.meta.env.VITE_API_BASE_URL ?? 'https://localhost:5001';
+    // constructor() {
+    //     const url = import.meta.env.VITE_API_BASE_URL;
+    //     // Ensure no trailing slash; allow empty string to use relative '/api' (works with dev proxy)
+    //     this.baseUrl = (url ?? 'https://localhost:5001').replace(/\/+$/, '');
+    // }
     public get<T>(input: RequestInfo): Promise<ApiResponseWrapper<T>> {
         return this.fetch<T>(input);
     }
