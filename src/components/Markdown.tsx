@@ -12,7 +12,7 @@ import supersub from "remark-supersub";
 import { unicodeCitation } from "./markdown/plugin";
 import cn from "@/core/utils";
 
-const Code = ({ children, isStreaming }: { children?: string, isStreaming?: boolean }) => {
+const Markdown = ({ children, isStreaming }: { children?: string, isStreaming?: boolean }) => {
  const remarkPlugins: Pluggable[] = [
   supersub,
   remarkGfm,
@@ -68,7 +68,7 @@ const Code = ({ children, isStreaming }: { children?: string, isStreaming?: bool
         </div>
     </>
 };
-export default memo(Code);
+export default memo(Markdown);
 
 
 
