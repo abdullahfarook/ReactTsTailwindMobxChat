@@ -10,13 +10,13 @@ import { NavigationSrv } from "@/services/NavigationSrv";
 import Spinner from "@/components/Spinner";
 import { TConversation } from "@/models/conversation";
 import { AuthStore } from "@/stores/AuthStore";
-import { SessionStore } from "@/stores/Session";
+import { Session } from "@/stores/Session";
 
 function SidePanel() {
     const app = useInstance(AppStore);  
     const chat = useInstance(ChatStore);
     const auth = useInstance(AuthStore);
-    const session = useInstance(SessionStore);
+    const session = useInstance(Session);
 
     const navStyle: React.CSSProperties = {
         width: app.isSidebarOpen ? "260px" : "0px",

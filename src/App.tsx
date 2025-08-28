@@ -3,24 +3,32 @@ import { Component } from "react";
 import { RouterProvider} from "react-router-dom";
 import { router } from "./routes/routes";
 import { provider } from "react-ioc";
-import { ApiService } from "./core/api";
+import { ApiSrv } from "./services/ApiSrv";
 import { AuthStore } from "./stores/AuthStore";
-import { NavigationSrv} from "./services/NavigationSrv";
+import { NavigationSrv as NavSrv} from "./services/NavigationSrv";
 import { ChatStore } from "./stores/ChatStore";
 import { AppStore } from "./stores/AppStore";
-import { SessionStore } from "./stores/Session";
+import { Session } from "./stores/Session";
+import { TokenSrv } from "./services/TokenSrv";
+import { ChatHub } from "./hubs/ChatHub";
 
-// export const StoreContext = createContext<RootStore>({} as RootStore);
-// export const StoreProvider = StoreContext.Provider;
-// export const useStore = (): RootStore => useContext(StoreContext);
+const stores = [
+  AppStore,
+  AuthStore, 
+  ChatStore, 
+  Session
+]
+const services = [
+  ApiSrv,
+  NavSrv,
+  TokenSrv, 
+  ChatHub
+]
 @observer
 @provider(
-  AppStore,
-  ApiService,
-  AuthStore, 
-  ChatStore,
-  SessionStore, 
-  NavigationSrv)
+  ...stores,
+  ...services
+)
 export default class App extends Component {
   render() {
     return (

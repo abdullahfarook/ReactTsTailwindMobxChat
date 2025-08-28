@@ -8,7 +8,7 @@ import { memo, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import Spinner from "@/components/Spinner";
 import { Message } from "@/models/message";
-import { SessionStore } from "@/stores/Session";
+import { Session } from "@/stores/Session";
 import { ChatMessage } from "./compnents/ChatMessage";
 
 export const Detail = observer(() => {
@@ -45,7 +45,7 @@ const ChatHistory = observer(() => {
     </>
 })
 export function NewChat() {
-   const session = useInstance(SessionStore);
+   const session = useInstance(Session);
     return <div className="flex flex-col flex-1 items-center justify-end sm:justify-center ">
    <div className="flex h-full transform-gpu flex-col items-center justify-center pb-16 transition-all duration-200 max-h-full sm:max-h-0 mb-0">
       <div className="flex flex-col items-center gap-0 p-2">

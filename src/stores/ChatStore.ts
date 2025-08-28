@@ -1,21 +1,22 @@
-import { ApiService } from "@/core/api";
+import { ApiSrv } from "@/services/ApiSrv";
 import { toHumanReadable } from "@/core/utils";
 import { TConversation } from "@/models/conversation";
 import { Message } from "@/models/message";
 import { computed, makeObservable, observable, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { v4 as uuid } from 'uuid';
-import { SessionStore } from "./Session";
+import { Session } from "./Session";
 import { NavigationSrv } from "@/services/NavigationSrv";
 import { ChatHub, WebSocketChatMessage, WebSocketInferenceString } from "@/hubs/ChatHub";
 import { IStreamResult } from "@microsoft/signalr";
+import { API_URL } from "@/services/ApiSrv";
 
 export class ChatStore {
     // injects
-    apiService = inject(this, ApiService);
-    session = inject(this, SessionStore);
+    apiService = inject(this, ApiSrv);
+    session = inject(this, Session);
     nav = inject(this, NavigationSrv);
-    chatHub = new ChatHub(`${this.apiService.baseUrl}/Hubs/ChatServicesHub`,async ()=> this.session.tokens.accessToken);
+    chatHub = inject(this, ChatHub);
 
     // observables
     @observable convsLoading = true;

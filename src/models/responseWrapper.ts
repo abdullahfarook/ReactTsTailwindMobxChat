@@ -1,3 +1,4 @@
+import camelcaseKeys from "camelcase-keys";
 import { TResult } from "./result";
 
 export class ApiResponseWrapper<T> implements TResult<T> {
@@ -11,6 +12,24 @@ export class ApiResponseWrapper<T> implements TResult<T> {
         this.apiSuccessResponse = apiSuccessResponse;
         this.apiErrorResponse = apiErrorResponse;
     }
+    static ok<T>(data: any, status?: number): ApiResponseWrapper<T> {
+        return new ApiResponseWrapper<T>(true, status ?? 200, new ApiSuccessResponse<T>(data.message, data.payload));
+    }
+    static fail<T>(data: any, status?: number): ApiResponseWrapper<T> {
+        if(typeof data === 'string') {
+            return new ApiResponseWrapper<T>(false, status??500, undefined, new ApiErrorResponse(undefined, data));
+        } else if(typeof data === 'object') {
+            return new ApiResponseWrapper<T>(false, status??500, undefined, new ApiErrorResponse(data.title, data.errorMessage, data.innerException, data.validationErrors));
+        }
+        return new ApiResponseWrapper<T>(false, status??500, undefined, new ApiErrorResponse(undefined, "An error occured while processing your request"));
+    }
+    static async parse<T>(res: Response): Promise<ApiResponseWrapper<T>> {
+        const data = camelcaseKeys(await res.json(), { deep: true });
+        if (!res.ok) {
+            return ApiResponseWrapper.fail<T>(data, res.status);
+        }
+        return ApiResponseWrapper.ok<T>(data, res.status);
+    }
     get success(): boolean {
         return this.isSuccessStatusCode;
     }
@@ -18,25 +37,9 @@ export class ApiResponseWrapper<T> implements TResult<T> {
         return this.isSuccessStatusCode ? this.apiSuccessResponse?.payload : undefined;
     }
     get message(): string | undefined {
-        return this.isSuccessStatusCode ? this.apiSuccessResponse?.successMessage : this.getApiFailureMessage();
+        return this.isSuccessStatusCode ? this.apiSuccessResponse?.successMessage : this.apiErrorResponse?.getErrorMessage();
     }
-    getApiFailureMessage(): string {
-        var error = null;
-        error = this.apiErrorResponse?.validationErrors?.[0]?.reason;
-        if (error) {
-            return error;
-        }
 
-        if (this.apiErrorResponse?.errorMessage) {
-            return this.apiErrorResponse.errorMessage;
-        }
-
-        if (this.apiErrorResponse?.title) {
-            return this.apiErrorResponse.title;
-        }
-
-        return "An error occured while processing your request";
-    }
 }
 export class ApiSuccessResponse<T> {
     successMessage: string;
@@ -48,16 +51,34 @@ export class ApiSuccessResponse<T> {
 }
 
 export class ApiErrorResponse {
-    title: string;
-    errorMessage: string;
+    title?: string;
+    errorMessage?: string;
     innerException?: string;
     validationErrors?: ValidationError[];
-    constructor(title: string, errorMessage: string, innerException?: string, validationErrors?: ValidationError[]) {
+    constructor(title?: string, errorMessage?: string, innerException?: string, validationErrors?: ValidationError[]) {
         this.title = title;
         this.errorMessage = errorMessage;
         this.innerException = innerException;
         this.validationErrors = validationErrors;
     }
+    getErrorMessage(): string {
+        var error = null;
+        error = this.validationErrors?.[0]?.reason;
+        if (error) {
+            return error;
+        }
+
+        if (this.errorMessage) {
+            return this.errorMessage;
+        }
+
+        if (this.title) {
+            return this.title;
+        }
+
+        return "An error occured while processing your request";
+    }
+        
 }
 
 class ValidationError {

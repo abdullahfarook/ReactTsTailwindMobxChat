@@ -1,6 +1,6 @@
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-
+import { reaction } from "mobx";
 /**
  * Merges the tailwind clases (using twMerge). Conditionally removes false values
  * @param inputs The tailwind classes to merge
@@ -156,5 +156,47 @@ function normalizeObserver<T>(
     next: (observerOrNext && observerOrNext.next) ? observerOrNext.next.bind(observerOrNext) : () => {},
     error: (observerOrNext && observerOrNext.error) ? observerOrNext.error.bind(observerOrNext) : (e: any) => { console.error(e); },
     complete: (observerOrNext && observerOrNext.complete) ? observerOrNext.complete.bind(observerOrNext) : () => {}
+  };
+}
+
+// accessToken$ = toSubscribable(this, s => s.accessToken);
+// accessToken$.subscribe(this, (value: string | null) => {
+//   console.log('accessToken changed', value);
+// });
+export function toSubscribable<T extends object, R>(
+  store: T,
+  selectorOrKey: ((state: T) => R) | keyof T
+) {
+  const selector: (state: T) => R =
+    typeof selectorOrKey === 'function'
+      ? (selectorOrKey as (s: T) => R)
+      : ((s: T) => (s as any)[selectorOrKey as keyof T] as R);
+
+  return {
+    subscribe(
+      thisArgOrCallback: any,
+      maybeCallback?: (value: R) => void
+    ) {
+      const callback: (value: R) => void =
+        typeof thisArgOrCallback === 'function'
+          ? thisArgOrCallback
+          : (maybeCallback as (value: R) => void);
+
+      const boundCallback =
+        typeof thisArgOrCallback === 'function'
+          ? callback
+          : callback?.bind(thisArgOrCallback);
+
+      // fire immediately with current value
+      boundCallback(selector(store));
+
+      // listen for future changes
+      const disposer = reaction(() => selector(store), (value) => {
+        boundCallback(value);
+      });
+
+      // return unsubscribe handle
+      return { unsubscribe: disposer };
+    },
   };
 }

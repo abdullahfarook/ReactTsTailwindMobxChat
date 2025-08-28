@@ -2,7 +2,7 @@ type LoginRequest = {
     email: string;
     password: string;
     browser2FaPersisted: boolean;
-    browser2FaPersistenceToken: string;
+    browser2FaPersistenceToken?: string | null  ;
 }
 type AuthResponse = {
     accessToken:string,

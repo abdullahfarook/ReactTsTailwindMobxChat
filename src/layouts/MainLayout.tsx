@@ -1,10 +1,10 @@
-import { SessionStore } from '@/stores/Session';
+import { Session } from '@/stores/Session';
 import { observer } from 'mobx-react';
 import { useInstance } from 'react-ioc';
 import { Navigate, Outlet} from 'react-router-dom';
 
 const MainLayout = () => {
-    const session = useInstance(SessionStore);
+    const session = useInstance(Session);
 
     if (session.isAuthenticated) {
         return (

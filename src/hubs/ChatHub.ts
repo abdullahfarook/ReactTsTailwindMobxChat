@@ -1,6 +1,12 @@
+import { API_URL } from '@/services/ApiSrv';
+import { TokenSrv } from '@/services/TokenSrv';
 import { HttpTransportType, HubConnection, HubConnectionBuilder, IStreamResult, LogLevel } from '@microsoft/signalr';
+import { inject } from 'react-ioc';
 import { v4 as uuid } from 'uuid';
 export class ChatHub {
+  token = inject(this, TokenSrv);
+  accessToken:string | null = null;
+
   conversationId: string = uuid();
   userInput: string = '';
   canSend: boolean = true;
@@ -25,22 +31,24 @@ export class ChatHub {
 
   // SignalR connection
   private hubConnection?: HubConnection;
-  private connectionUrl: string;
-  private accessTokenProvider: () => Promise<string | null>;
+
 
   // Callback functions
   private onInferenceString?: InferenceStringCallback;
   private onInferenceStatus?: InferenceStatusCallback;
   private onStateChange?: StateChangeCallback;
 
-  constructor(
-    connectionUrl: string,
-    accessTokenProvider: () => Promise<string | null>
-  ) {
-    this.connectionUrl = connectionUrl;
-    this.accessTokenProvider = accessTokenProvider;
-    
+  constructor() {
+    this.watchForTokenChanges();
   }
+  
+  private watchForTokenChanges() {
+    this.token.accessToken$.subscribe((accessToken:string | null) => {
+     if(accessToken) {
+         this.accessToken = accessToken;
+     }
+    });
+ }
 
   // Public methods
   public initialize(conversationId: string, messages: WebSocketChatMessage[]): void {
@@ -63,9 +71,7 @@ export class ChatHub {
       this.isConnecting = false;
 
       this.notifyStateChange(true);
-      console.log('WebSocketChat: Connected to SignalR hub');
     } catch (error) {
-      console.error('WebSocketChat: Failed to start connection', error);
       this.isConnected = false;
       this.isConnecting = false;
       this.notifyStateChange(false);
@@ -83,9 +89,7 @@ export class ChatHub {
       this.isConnected = false;
       this.isConnecting = false;
       this.notifyStateChange(false);
-      console.log('WebSocketChat: Disconnected from SignalR hub');
     } catch (error) {
-      console.error('WebSocketChat: Error stopping connection', error);
       throw error;
     }
   }
@@ -172,13 +176,13 @@ export class ChatHub {
 
   // Private methods
   private async createHubConnection(): Promise<void> {
-    const token = await this.accessTokenProvider();
+    //const token = await this.accessTokenProvider();
     
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl(this.connectionUrl, {
-        accessTokenFactory: () => token || '',
-        skipNegotiation: true,
-        transport: HttpTransportType.WebSockets
+      .withUrl(`${API_URL}/Hubs/ChatServicesHub`, {
+        accessTokenFactory: () => this.accessToken || '',
+        // skipNegotiation: true,
+        transport: HttpTransportType.ServerSentEvents
       })
       .configureLogging(LogLevel.Information)
       .withAutomaticReconnect()

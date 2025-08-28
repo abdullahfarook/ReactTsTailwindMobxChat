@@ -1,10 +1,12 @@
-import { ApiService } from "@/core/api";
-import { action, makeObservable, observable, runInAction } from "mobx";
+import { ApiSrv } from "@/services/ApiSrv";
+import { makeObservable, observable, reaction, runInAction } from "mobx";
 import { inject } from "react-ioc";
 import { jwtDecode } from "jwt-decode";
 import camelcaseKeys from "camelcase-keys";
-export class SessionStore {
-    api = inject(this, ApiService);
+import { TokenSrv } from "@/services/TokenSrv";
+export class Session {
+    api = inject(this, ApiSrv);
+    token = inject(this, TokenSrv);
     isAuthenticated = false;
     userId!: string;
     fullName!: string;
@@ -14,10 +16,14 @@ export class SessionStore {
     }
     
     constructor() {
-        makeObservable(this, {
-            isAuthenticated: observable,
-            setSession: action,
-        });
+        makeObservable(this, { isAuthenticated: observable });
+        this.watchForTokenChanges();
+    }
+    setSession(accessToken: string | null) {
+        if(accessToken) {
+            this.createSession(accessToken);
+            runInAction(() => this.isAuthenticated = true);
+        }
     }
     get tokens(): AuthResponse {
         return {
@@ -26,15 +32,8 @@ export class SessionStore {
         }
     }
 
-    setSession(res: AuthResponse) {
-        this.storeTokens(res);
-        const token = res.accessToken;
-        this.createSession(token);
-        runInAction(() => this.isAuthenticated = true);
-    }
-
     removeSession() {
-        this.removeTokens();
+        this.token.clearTokens();
         this.setFields({} as any);
         this.isAuthenticated = false;
     }
@@ -49,12 +48,11 @@ export class SessionStore {
         this.fullName = parsed.fullName;
     }
 
-    private storeTokens(res: AuthResponse) {
-        localStorage.setItem('accessToken', res.accessToken);
-        localStorage.setItem('refreshToken', res.refreshToken);
-    }
-    private removeTokens() {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+    private watchForTokenChanges() {
+       this.token.accessToken$.subscribe((accessToken:string | null) => {
+        if(accessToken) {
+            this.setSession(accessToken);
+        }
+       });
     }
 }
