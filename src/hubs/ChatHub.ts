@@ -24,7 +24,8 @@ export class ChatHub {
       frequencyPenalty: 0.0,
       presencePenalty: 0.0
     },
-    systemMessage: 'You are a helpful assistant. You always respond details in professional, elegent and beautiful markdown format without any code blocks. or html code',
+    // systemMessage: 'You are a helpful assistant. You always respond details in professional, elegent and beautiful markdown format without any code blocks. or html code',
+    systemMessage: 'You are helpful assitance that always respond in markdown format and must show markdown table if specified',
     darkMode: false,
     settingsVersion: 1
   };
@@ -218,7 +219,8 @@ export class ChatHub {
     const chatConversation: InferenceRequest = {
       id: this.conversationId,
       settings: this.localStorageSettings.inferenceSettings,
-      systemMessage: this.localStorageSettings.systemMessage,
+      systemMessage: ` ${this.localStorageSettings.systemMessage}\n Note: Temporary Conversation ID of this session is ${this.conversationId}. This must not change the format of the response.`,
+      // systemMessage: this.localStorageSettings.systemMessage,
       chatMessages: []
     };
 
@@ -228,6 +230,9 @@ export class ChatHub {
         message: promptAndResponse.prompt,
         role: 'user'
       };
+      // if(this.webSocketChatMessages.length === 1){
+      //   userMessage.conversationId = this.conversationId;
+      // }
       chatConversation.chatMessages.push(userMessage);
 
       if (promptAndResponse.isComplete && promptAndResponse.success) {
@@ -371,6 +376,7 @@ export interface WebSocketInferenceStatusUpdate {
 export interface ChatMessage {
   id: string;
   message: string;
+  conversationId?: string;
   role: 'user' | 'assistant';
 }
 
@@ -391,7 +397,7 @@ export interface InferenceRequest {
 
 export interface LocalStorageSettings {
   inferenceSettings: InferenceSettings;
-  systemMessage: string;
+    systemMessage: string;
   darkMode: boolean;
   settingsVersion: number;
 }
