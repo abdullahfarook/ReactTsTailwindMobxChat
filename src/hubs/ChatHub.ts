@@ -25,7 +25,7 @@ export class ChatHub {
       presencePenalty: 0.0
     },
     // systemMessage: 'You are a helpful assistant. You always respond details in professional, elegent and beautiful markdown format without any code blocks. or html code',
-    systemMessage: 'You are helpful assitance that always respond in markdown format and must show markdown table if specified',
+    systemMessage: 'You are helpful assitance that always respond in markdown format without any code blocks or html code and. You must show markdown table if specified',
     darkMode: false,
     settingsVersion: 1
   };
