@@ -1,9 +1,9 @@
-
-export type TResult<T= void> = {
+export type TResult<T = void> = {
     success: boolean;
     payload?: T;
     message?: string;
 };
+
 export function ok<T = void>(payload?: T): TResult<T> {
     return {
         success: true,

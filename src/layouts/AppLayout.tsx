@@ -1,10 +1,10 @@
-import { NavigationSrv } from "@/services/NavigationSrv";
+import {NavigationSrv} from "@/services/NavigationSrv";
 import Spinner from "@/components/Spinner";
-import { AuthStore } from "@/stores/AuthStore";
-import { observer } from "mobx-react";
-import { useEffect } from "react";
-import { useInstance } from "react-ioc";
-import { useLocation, useNavigate, useParams, Outlet } from "react-router-dom";
+import {AuthStore} from "@/stores/AuthStore";
+import {observer} from "mobx-react";
+import {useEffect} from "react";
+import {useInstance} from "react-ioc";
+import {useLocation, useNavigate, useParams, Outlet} from "react-router-dom";
 
 function AppLayout() {
     const location = useLocation();
@@ -24,11 +24,14 @@ function AppLayout() {
     }, [location]);
 
     if (auth.isAuthenticating) {
-        return <div className="flex flex-1 h-screen items-center justify-center" aria-live="polite" role="status">
-            <Spinner className="text-text-primary" />
+        return <div className="flex flex-1 h-screen items-center justify-center"
+                    aria-live="polite"
+                    role="status">
+            <Spinner className="text-text-primary"/>
         </div>
     }
 
-    return <Outlet />;
+    return <Outlet/>;
 }
+
 export default observer(AppLayout);

@@ -1,9 +1,10 @@
-import { ApiSrv } from "@/services/ApiSrv";
-import { makeObservable, observable, reaction, runInAction } from "mobx";
-import { inject } from "react-ioc";
-import { jwtDecode } from "jwt-decode";
+import {ApiSrv} from "@/services/ApiSrv";
+import {makeObservable, observable, reaction, runInAction} from "mobx";
+import {inject} from "react-ioc";
+import {jwtDecode} from "jwt-decode";
 import camelcaseKeys from "camelcase-keys";
-import { TokenSrv } from "@/services/TokenSrv";
+import {TokenSrv} from "@/services/TokenSrv";
+
 export class Session {
     api = inject(this, ApiSrv);
     token = inject(this, TokenSrv);
@@ -14,17 +15,19 @@ export class Session {
     get firstName(): string {
         return this.fullName?.split(' ')?.[0];
     }
-    
+
     constructor() {
-        makeObservable(this, { isAuthenticated: observable });
+        makeObservable(this, {isAuthenticated: observable});
         this.watchForTokenChanges();
     }
+
     setSession(accessToken: string | null) {
-        if(accessToken) {
+        if (accessToken) {
             this.createSession(accessToken);
             runInAction(() => this.isAuthenticated = true);
         }
     }
+
     get tokens(): AuthResponse {
         return {
             accessToken: localStorage.getItem('accessToken')!,
@@ -39,7 +42,8 @@ export class Session {
     }
 
     private createSession(token: string) {
-        const parsed = camelcaseKeys(jwtDecode<any>(token));;
+        const parsed = camelcaseKeys(jwtDecode<any>(token));
+        ;
         this.setFields(parsed);
     }
 
@@ -49,10 +53,10 @@ export class Session {
     }
 
     private watchForTokenChanges() {
-       this.token.accessToken$.subscribe((accessToken:string | null) => {
-        if(accessToken) {
-            this.setSession(accessToken);
-        }
-       });
+        this.token.accessToken$.subscribe((accessToken: string | null) => {
+            if (accessToken) {
+                this.setSession(accessToken);
+            }
+        });
     }
 }

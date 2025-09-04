@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder, IStreamResult } from "@microsoft/signalr";
+import {HubConnection, HubConnectionBuilder, IStreamResult} from "@microsoft/signalr";
 
 class Signalr {
     private _connection: HubConnection;
@@ -17,9 +17,11 @@ class Signalr {
     get isConnected() {
         return this._isConnected;
     }
+
     get hasError() {
         return this._error != null;
     }
+
     get error() {
         return this._error;
     }
@@ -48,4 +50,4 @@ class Signalr {
 }
 
 const chatSignalr = new Signalr("/chatHub");
-export { chatSignalr };
+export {chatSignalr};

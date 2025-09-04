@@ -1,22 +1,25 @@
-import { jwtDecode } from "jwt-decode";
-import { ApiResponseWrapper } from "@/models/responseWrapper";
-import { API_URL, defaultHeaders } from "./ApiSrv";
-import { computed, makeObservable, observable, runInAction } from "mobx";
-import { toSubscribable } from "@/core/utils";
+import {jwtDecode} from "jwt-decode";
+import {ApiResponseWrapper} from "@/models/responseWrapper";
+import {API_URL, defaultHeaders} from "./ApiSrv";
+import {computed, makeObservable, observable, runInAction} from "mobx";
+import {toSubscribable} from "@/core/utils";
 
 export class TokenSrv {
     private refreshSf = new SingleFlight<boolean>();
     private readonly tokenClockSkewSeconds: number = 30;
     _accessToken: string | null = null;
-    accessToken$ = toSubscribable(this, s=> s._accessToken);
+    accessToken$ = toSubscribable(this, s => s._accessToken);
+
     constructor() {
         makeObservable(this, {
             _accessToken: observable,
         });
     }
+
     private get accessToken(): string | null {
         return localStorage.getItem('accessToken');
     }
+
     private get refreshToken(): string | null {
         return localStorage.getItem('refreshToken');
     }
@@ -28,7 +31,7 @@ export class TokenSrv {
 
     getAuthHeader(): Record<string, string> {
         const token = this.accessToken;
-        return token ? { Authorization: "Bearer " + token } : {};
+        return token ? {Authorization: "Bearer " + token} : {};
     }
 
     storeTokens(accessToken: string, refreshToken: string) {
@@ -72,19 +75,18 @@ export class TokenSrv {
                 return false;
             }
             const url = `${API_URL}/api/identity/account/RefreshToken`;
-            const body = JSON.stringify({ accessToken, refreshToken });
+            const body = JSON.stringify({accessToken, refreshToken});
             try {
                 const res = await fetch(url, {
                     method: 'POST',
                     body,
                     headers: defaultHeaders(),
                 });
-                const result = await ApiResponseWrapper.parse<AuthResponse>(res)    ;
+                const result = await ApiResponseWrapper.parse<AuthResponse>(res);
                 if (result.isSuccessStatusCode) {
                     this.storeTokens(result.payload!.accessToken, result.payload!.refreshToken);
                     return true;
-                }
-                else {
+                } else {
                     // this.clearTokens();
                     return false;
                 }

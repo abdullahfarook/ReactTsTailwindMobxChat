@@ -1,10 +1,10 @@
-import { Message } from "./message";
+import {Message} from "./message";
 
 export type TConversation = {
-  id: string;
-  title: string;
-  updatedOn: Date;
-  messages?: Message[];
+    id: string;
+    title: string;
+    updatedOn: Date;
+    messages?: Message[];
 }
 export const convs: TConversation[] = [
     {

@@ -1,10 +1,12 @@
-import { ValidationErrors, Validator } from "fluentvalidation-ts";
-import { makeObservable, observable, action, runInAction } from "mobx";
+import {ValidationErrors, Validator} from "fluentvalidation-ts";
+import {makeObservable, observable, action, runInAction} from "mobx";
 
 export interface IForm<TModel> {
     model: TModel;
     submitError?: string | null;
+
     setSubmitError(value: string | null): void;
+
     validateForm(value: TModel): ValidationErrors<TModel>;
 }
 
@@ -14,6 +16,7 @@ export abstract class FormValidator<TModel> extends Validator<TModel> implements
     isValid = true;
 
     fields = this.fieldsFactory<TModel>();
+
     setSubmitError(value: string | null): void {
         this.submitError = value;
     }
@@ -30,7 +33,7 @@ export abstract class FormValidator<TModel> extends Validator<TModel> implements
     validateForm(value: TModel): ValidationErrors<TModel> {
         this.model = value;
         const errors = this.validate(value);
-        runInAction (()=> this.isValid = !this.hasErrors(errors));
+        runInAction(() => this.isValid = !this.hasErrors(errors));
         return errors;
     }
 
@@ -52,7 +55,7 @@ export abstract class FormValidator<TModel> extends Validator<TModel> implements
 
         return false;
     }
-    
+
     private fieldsFactory<T>() {
         return <K extends keyof T>(key: K) => key;
     }

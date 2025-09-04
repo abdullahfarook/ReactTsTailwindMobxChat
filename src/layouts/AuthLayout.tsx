@@ -1,8 +1,11 @@
-import { Outlet } from 'react-router-dom';
+import {Outlet} from 'react-router-dom';
 
 export const AuthLayout = () =>
-    <div id="root" style={{ "padding": "25px" }} className="component-inspector-selected">
-        <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900" style={{}}>
+    <div id="root"
+         style={{"padding": "25px"}}
+         className="component-inspector-selected">
+        <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900"
+             style={{}}>
             <div className="mt-6 h-10 w-full bg-cover">
                 {/* <img src="/assets/logo.svg" className="h-full w-full object-contain" alt="LibreChat Logo" /> */}
             </div>
@@ -17,6 +20,6 @@ export const AuthLayout = () =>
                     </div>
                 </div>
             </div> */}
-            <Outlet />
+            <Outlet/>
         </div>
     </div>

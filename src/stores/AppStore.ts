@@ -1,16 +1,17 @@
-import { FieldState } from "formstate";
-import { makeAutoObservable } from "mobx";
+import {FieldState} from "formstate";
+import {makeAutoObservable} from "mobx";
 
 export class AppStore {
-  currentItem = new FieldState("");
-  isSidebarOpen = true;
-  constructor() {
-    makeAutoObservable(this);
-  }
+    currentItem = new FieldState("");
+    isSidebarOpen = true;
 
-  toggleSidebar() {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
+    constructor() {
+        makeAutoObservable(this);
+    }
 
-  
+    toggleSidebar() {
+        this.isSidebarOpen = !this.isSidebarOpen;
+    }
+
+
 }

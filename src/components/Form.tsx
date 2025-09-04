@@ -1,15 +1,16 @@
-
-import { IForm } from "@/models/iform";
-import { TResult } from "@/models/result";
-import { Form, Formik, FormikValues } from "formik";
+import {IForm} from "@/models/iform";
+import {TResult} from "@/models/result";
+import {Form, Formik, FormikValues} from "formik";
 
 export type FormProps<T> = {
     data: IForm<T>;
     onSubmit: (values: T) => any;
     children?: React.ReactNode;
 }
+
 export function InputForm<T extends FormikValues>(props: FormProps<T>) {
-    const { data, onSubmit, children } = props;
+    const {data, onSubmit, children} = props;
+
     function isTResult<T>(obj: any): obj is TResult<T> {
         return (
             obj !== null &&
@@ -31,7 +32,7 @@ export function InputForm<T extends FormikValues>(props: FormProps<T>) {
     return (
         <Formik<T>
             initialValues={data.model}
-            validate={values=> data.validateForm(values)}
+            validate={values => data.validateForm(values)}
             onSubmit={submitForm}>
             <Form>
                 {children}

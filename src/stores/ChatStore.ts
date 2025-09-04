@@ -1,15 +1,15 @@
-import { ApiSrv } from "@/services/ApiSrv";
-import { toHumanReadable } from "@/core/utils";
-import { TConversation } from "@/models/conversation";
-import { Message } from "@/models/message";
-import { computed, makeObservable, observable, runInAction } from "mobx";
-import { inject } from "react-ioc";
-import { v4 as uuid } from 'uuid';
-import { Session } from "./Session";
-import { NavigationSrv } from "@/services/NavigationSrv";
-import { ChatHub, WebSocketChatMessage, WebSocketInferenceString } from "@/hubs/ChatHub";
-import { IStreamResult } from "@microsoft/signalr";
-import { API_URL } from "@/services/ApiSrv";
+import {ApiSrv} from "@/services/ApiSrv";
+import {toHumanReadable} from "@/core/utils";
+import {TConversation} from "@/models/conversation";
+import {Message} from "@/models/message";
+import {computed, makeObservable, observable, runInAction} from "mobx";
+import {inject} from "react-ioc";
+import {v4 as uuid} from 'uuid';
+import {Session} from "./Session";
+import {NavigationSrv} from "@/services/NavigationSrv";
+import {ChatHub, WebSocketChatMessage, WebSocketInferenceString} from "@/hubs/ChatHub";
+import {IStreamResult} from "@microsoft/signalr";
+import {API_URL} from "@/services/ApiSrv";
 
 export class ChatStore {
     // injects
@@ -36,9 +36,8 @@ export class ChatStore {
 
     @computed
     get messages(): Message[] {
-        return this.allMessages.filter(m => m.conversationId === this.activeConvId)??[];
+        return this.allMessages.filter(m => m.conversationId === this.activeConvId) ?? [];
     }
-
 
 
     get convsByDate(): [string, TConversation[]][] {
@@ -74,7 +73,7 @@ export class ChatStore {
 
     async loadChat(conversationId: string) {
         if (conversationId === 'new') {
-            runInAction(() =>  this.activeConvId = undefined);
+            runInAction(() => this.activeConvId = undefined);
             return;
         }
         runInAction(() => {
@@ -87,52 +86,55 @@ export class ChatStore {
         })
 
     }
+
     async submitChatMessage(message: string) {
         if (!this.activeConvId) {
             this.createNewConversation(message);
-        }else{
+        } else {
             this.addMessageToConversation(message);
         }
         this.updateConvDate();
     }
+
     private updateConvDate() {
         const conversation = this.conversations.find(c => c.id === this.activeConvId);
-        if(!conversation) return;
+        if (!conversation) return;
         runInAction(() => conversation!.updatedOn = new Date());
         this.updateConversations();
     }
 
     addMessageToConversation(message: string) {
-        const newMessage = this.createUserMessage(message,this.activeConvId!);
+        const newMessage = this.createUserMessage(message, this.activeConvId!);
         runInAction(() => this.allMessages.push(newMessage));
         this.updateChatStore();
-        this.askPrompt(message,this.activeConvId!,this.messages);
+        this.askPrompt(message, this.activeConvId!, this.messages);
         this.nav.navigate(`/chat/${this.activeConvId}`);
     }
 
     createNewConversation(message: string) {
         runInAction(() => this.chatLoading = true);
         const newConv: TConversation = this.createNewConv(message);
-        const messages = [...newConv.messages??[]];
+        const messages = [...newConv.messages ?? []];
         newConv.messages = undefined;
         this.conversations.push(newConv);
         runInAction(() => this.allMessages = this.allMessages.concat(messages));
         this.updateChatStore();
-        this.askPrompt(message,newConv.id,[]);
+        this.askPrompt(message, newConv.id, []);
         this.nav.navigate(`/chat/${newConv.id}`);
     }
 
-    private createNewConv(message: string):TConversation {
+    private createNewConv(message: string): TConversation {
         const newConvId = uuid();
         const newConv: TConversation = {
             id: newConvId,
             // trim to 4 words
             title: message.split(' ').slice(0, 7).join(' '),
             updatedOn: new Date(),
-            messages: [this.createUserMessage(message,newConvId)],
+            messages: [this.createUserMessage(message, newConvId)],
         };
         return newConv;
     }
+
     private createUserMessage(message: string, conversationId: string) {
         const newMessageId = uuid();
         const newMessage: Message = {
@@ -160,7 +162,7 @@ export class ChatStore {
         return newMessage;
     }
 
-    private askPrompt(message: string, conversationId: string,messages: Message[]) {
+    private askPrompt(message: string, conversationId: string, messages: Message[]) {
         this.chatHub.initialize(conversationId, this.convertToWebSocketChatMessage(messages));
         this.chatHub.addMessage(message);
         this.stream = this.chatHub.sendInferenceRequestAsync();
@@ -180,7 +182,7 @@ export class ChatStore {
                 });
             },
             complete: () => {
-                if(!this.lastMessage) return;
+                if (!this.lastMessage) return;
                 runInAction(() => {
                     this.lastMessage!.response = {
                         ...this.lastMessage!.response,
@@ -193,26 +195,26 @@ export class ChatStore {
                 console.error(error);
             }
         });
-        
+
     }
 
-    convertToWebSocketChatMessage(messages: Message[]):WebSocketChatMessage[] {
+    convertToWebSocketChatMessage(messages: Message[]): WebSocketChatMessage[] {
         const webSocketChatMessages: WebSocketChatMessage[] = [];
         for (const message of messages) {
-            if(message.role === "user"){
+            if (message.role === "user") {
                 const userMessage: WebSocketChatMessage = {
                     id: message.id,
-                    prompt: message.content??'',
+                    prompt: message.content ?? '',
                     isComplete: true,
                     response: '',
                     success: message.isSuccess,
                 }
                 webSocketChatMessages.push(userMessage);
             }
-            if(message.role === "agent"){
+            if (message.role === "agent") {
                 const agentMessage: WebSocketChatMessage = {
                     id: message.id,
-                    response: message.content??'',
+                    response: message.content ?? '',
                     isComplete: true,
                     prompt: '',
                     success: message.isSuccess,

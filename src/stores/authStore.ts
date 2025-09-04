@@ -1,10 +1,9 @@
-
-import { makeAutoObservable, runInAction } from "mobx";
-import { inject } from "react-ioc";
-import { ApiSrv } from "@/services/ApiSrv";
-import { NavigationSrv } from "@/services/NavigationSrv";
-import { Session } from "./Session";
-import { TokenSrv } from "@/services/TokenSrv";
+import {makeAutoObservable, runInAction} from "mobx";
+import {inject} from "react-ioc";
+import {ApiSrv} from "@/services/ApiSrv";
+import {NavigationSrv} from "@/services/NavigationSrv";
+import {Session} from "./Session";
+import {TokenSrv} from "@/services/TokenSrv";
 
 export class AuthStore {
     apiService = inject(this, ApiSrv);
@@ -14,9 +13,11 @@ export class AuthStore {
     isAuthenticated = false;
     isAuthenticating = true;
     loginRequest?: LoginRequest;
+
     get isLoggedInCompleted(): boolean {
         return this.loginRequest != null;
     }
+
     constructor() {
         makeAutoObservable(this);
     }
@@ -48,7 +49,7 @@ export class AuthStore {
             return;
         }
 
-        const auth = res.payload!.authResponse; 
+        const auth = res.payload!.authResponse;
         this.tokenService.storeTokens(auth.accessToken, auth.refreshToken);
 
         runInAction(() => this.isAuthenticated = true);
@@ -57,28 +58,29 @@ export class AuthStore {
     }
 
     async login2fa(code: string) {
-        var req: LoginWith2FaRequest = {
+        const req: LoginWith2FaRequest = {
             userName: this.loginRequest!.email,
             password: this.loginRequest!.password,
             twoFactorCode: code,
             rememberBrowser: true,
-        }
+        };
         const res = await this.apiService.post<LoginWith2FaResponse>('/identity/account/LoginWith2Fa', req);
         if (!res.success) return res;
 
-        var auth = res.payload!.authResponse;
+        const auth = res.payload!.authResponse;
         this.tokenService.storeTokens(auth.accessToken, auth.refreshToken);
 
         runInAction(() => {
             this.isAuthenticated = true
             this.loginRequest = undefined;
         });
-        this.navigator.navigate('/',{ replace: true });
+        this.navigator.navigate('/', {replace: true});
 
     }
+
     logout() {
         this.session.removeSession();
-        this.navigator.navigate('/login', { replace: true });
+        this.navigator.navigate('/login', {replace: true});
     }
 }
 

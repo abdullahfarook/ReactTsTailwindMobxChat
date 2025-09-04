@@ -1,10 +1,10 @@
 import SidePanel from '@/routes/chat/SidePanel';
-import { Outlet } from 'react-router-dom';
+import {Outlet} from 'react-router-dom';
 
 const ChatLayout = () => {
     return <>
-    <SidePanel />
-    <Outlet />
+        <SidePanel/>
+        <Outlet/>
     </>
 }
 

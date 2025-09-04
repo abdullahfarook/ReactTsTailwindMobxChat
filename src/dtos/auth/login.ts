@@ -2,11 +2,11 @@ type LoginRequest = {
     email: string;
     password: string;
     browser2FaPersisted: boolean;
-    browser2FaPersistenceToken?: string | null  ;
+    browser2FaPersistenceToken?: string | null;
 }
 type AuthResponse = {
-    accessToken:string,
-    refreshToken:string
+    accessToken: string,
+    refreshToken: string
 }
 type LoginResponse = {
     requiresTwoFactor: boolean;
